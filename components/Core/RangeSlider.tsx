@@ -3,18 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { useRef, useEffect, useState } from 'react';
-import { type MotionValue, animate } from 'framer-motion';
+import { type MotionValue } from 'framer-motion';
 import { useTheme } from '../../Theme.tsx';
 
 interface RangeSliderProps {
   label: string;
   motionValue: MotionValue<number>;
   onCommit: (value: number) => void;
+  onChange?: (value: number) => void;
   min?: number;
   max?: number;
+  trackBackground?: string;
 }
 
-const RangeSlider: React.FC<RangeSliderProps> = ({ label, motionValue, onCommit, min = 0, max = 100 }) => {
+const RangeSlider: React.FC<RangeSliderProps> = ({ 
+  label, 
+  motionValue, 
+  onCommit, 
+  onChange,
+  min = 0, 
+  max = 100,
+  trackBackground 
+}) => {
   const { theme } = useTheme();
   const trackRef = useRef<HTMLDivElement>(null);
   const [internalValue, setInternalValue] = useState(motionValue.get());
@@ -22,7 +32,7 @@ const RangeSlider: React.FC<RangeSliderProps> = ({ label, motionValue, onCommit,
 
   // Sync internal state with external motion value updates (e.g. undo/redo)
   useEffect(() => {
-    const unsubscribe = motionValue.onChange((v) => {
+    const unsubscribe = motionValue.on("change", (v) => {
       if (!isDragging) {
         setInternalValue(v);
       }
@@ -38,6 +48,7 @@ const RangeSlider: React.FC<RangeSliderProps> = ({ label, motionValue, onCommit,
     
     setInternalValue(newValue);
     motionValue.set(newValue); // Real-time update
+    if (onChange) onChange(newValue);
   };
 
   const handlePointerDown = (e: React.PointerEvent) => {
@@ -102,20 +113,23 @@ const RangeSlider: React.FC<RangeSliderProps> = ({ label, motionValue, onCommit,
                 position: 'relative', 
                 width: '100%', 
                 height: '6px', 
-                backgroundColor: theme.Color.Base.Surface[3], 
+                backgroundColor: trackBackground ? 'transparent' : theme.Color.Base.Surface[3], 
+                background: trackBackground || undefined,
                 borderRadius: '3px',
                 overflow: 'visible' 
             }}>
-                {/* Fill Bar */}
-                <div style={{ 
-                    position: 'absolute', 
-                    top: 0, 
-                    left: 0, 
-                    height: '100%', 
-                    width: `${percentage}%`, 
-                    backgroundColor: theme.Color.Accent.Surface[1], 
-                    borderRadius: '3px' 
-                }} />
+                {/* Fill Bar (Only show if no custom background gradient) */}
+                {!trackBackground && (
+                  <div style={{ 
+                      position: 'absolute', 
+                      top: 0, 
+                      left: 0, 
+                      height: '100%', 
+                      width: `${percentage}%`, 
+                      backgroundColor: theme.Color.Accent.Surface[1], 
+                      borderRadius: '3px' 
+                  }} />
+                )}
                 
                 {/* Thumb */}
                 <div style={{
@@ -146,14 +160,9 @@ const RangeSlider: React.FC<RangeSliderProps> = ({ label, motionValue, onCommit,
              const clamped = Math.min(Math.max(v, min), max);
              setInternalValue(clamped);
              motionValue.set(clamped);
+             if (onChange) onChange(clamped);
           }}
           onBlur={() => onCommit(internalValue)}
-          onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                  onCommit(internalValue);
-                  (e.target as HTMLInputElement).blur();
-              }
-          }}
           style={numberInputStyle}
         />
       </div>

@@ -25,6 +25,7 @@ const MetaPrototype = () => {
   
   // -- App State --
   const [btnProps, setBtnProps] = useState<MetaButtonProps>({
+    componentType: 'button',
     label: 'Do Magic',
     variant: 'primary',
     size: 'M',
@@ -106,8 +107,6 @@ const MetaPrototype = () => {
       timestamp: new Date().toLocaleTimeString(),
       message: msg,
     };
-    // Append new logs to the end (Standard Console behavior)
-    // Keep only the last 50 logs
     setLogs(prev => [...prev, entry].slice(-50));
   };
   
@@ -196,18 +195,18 @@ const MetaPrototype = () => {
 
   const handleToggleMeasurements = () => {
     setShowMeasurements(prev => !prev);
-    if (showTokens) setShowTokens(false); // Exclusive toggle
+    if (showTokens) setShowTokens(false);
     logEvent(`Measurements toggled: ${!showMeasurements ? 'On' : 'Off'}`);
   };
 
   const handleToggleTokens = () => {
     setShowTokens(prev => !prev);
-    if (showMeasurements) setShowMeasurements(false); // Exclusive toggle
+    if (showMeasurements) setShowMeasurements(false);
     logEvent(`Tokens toggled: ${!showTokens ? 'On' : 'Off'}`);
   };
   
   const handleStageButtonClick = () => {
-    logEvent('Button Clicked! (Triggered Action)');
+    logEvent('Component Interacted! (Triggered Action)');
     setConfettiTrigger(prev => prev + 1);
   };
 

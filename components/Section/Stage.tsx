@@ -6,17 +6,18 @@ import React, { useRef } from 'react';
 import { motion, MotionValue, useTransform, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../Theme.tsx';
 import Button from '../Core/Button.tsx';
+import Card from '../Package/Card.tsx';
 import { MetaButtonProps } from '../../types/index.tsx';
 import { useElementAnatomy, ElementAnatomy, NormalizedRect } from '../../hooks/useElementAnatomy.tsx';
 
 // --- HELPER TYPES & COMPONENTS ---
 
-type StageButtonProps = Omit<MetaButtonProps, 'customRadius'> & {
+type StageComponentProps = Omit<MetaButtonProps, 'customRadius'> & {
   customRadius: any; // Allow MotionValue
 }
 
 interface StageProps {
-  btnProps: StageButtonProps;
+  btnProps: StageComponentProps;
   onButtonClick: () => void;
   showMeasurements: boolean;
   showTokens: boolean;
@@ -36,7 +37,6 @@ const DimensionLine = ({
 }) => {
     const { theme } = useTheme();
     
-    // Calculate perpendicular offset
     let dx = 0, dy = 0;
     if (position === 'top') dy = -offset;
     if (position === 'bottom') dy = offset;
@@ -46,11 +46,9 @@ const DimensionLine = ({
     const ox1 = x1 + dx, oy1 = y1 + dy;
     const ox2 = x2 + dx, oy2 = y2 + dy;
     
-    // Label Position
     const lx = (ox1 + ox2) / 2;
     const ly = (oy1 + oy2) / 2;
     
-    // Tick Marks (Perpendicular small lines at ends)
     const TICK_SIZE = 4;
     let tx = 0, ty = 0;
     if (position === 'top' || position === 'bottom') ty = TICK_SIZE;
@@ -72,7 +70,7 @@ const DimensionLine = ({
         opacity: 0.9,
     };
 
-    const textWidth = label.length * 6 + 8; // Approx width
+    const textWidth = label.length * 6 + 8;
 
     return (
         <g>
@@ -87,9 +85,6 @@ const DimensionLine = ({
     );
 };
 
-/**
- * 🧱 Blueprint Overlay
- */
 const BlueprintOverlay: React.FC<{ anatomy: ElementAnatomy }> = ({ anatomy }) => {
     const { theme } = useTheme();
     const { width, height, padding, children, gap } = anatomy;
@@ -132,7 +127,7 @@ const BlueprintOverlay: React.FC<{ anatomy: ElementAnatomy }> = ({ anatomy }) =>
                 <DimensionLine x1={0} y1={0} x2={width} y2={0} label={`${Math.round(width)}`} offset={LINE_OFFSET} color={colorDim} position="top" />
                 <DimensionLine x1={0} y1={0} x2={0} y2={height} label={`${Math.round(height)}`} offset={LINE_OFFSET} color={colorDim} position="left" />
                 {padding.left > 0 && <DimensionLine x1={0} y1={height} x2={padding.left} y2={height} label={`${Math.round(padding.left)}`} offset={LINE_OFFSET} color={colorLayout} position="bottom" />}
-                {gap > 1 && children.icon && children.text && <DimensionLine x1={children.icon.x + children.icon.width} y1={height} x2={children.text.x} y2={height} label={`${Math.round(gap)}`} offset={LINE_OFFSET} color={colorLayout} position="bottom" />}
+                {gap > 1 && <DimensionLine x1={padding.left} y1={height} x2={width - padding.right} y2={height} label={`${Math.round(gap)}`} offset={LINE_OFFSET + 20} color={colorLayout} position="bottom" />}
                 {padding.right > 0 && <DimensionLine x1={width - padding.right} y1={height} x2={width} y2={height} label={`${Math.round(padding.right)}`} offset={LINE_OFFSET} color={colorLayout} position="bottom" />}
             </g>
         </svg>
@@ -140,9 +135,6 @@ const BlueprintOverlay: React.FC<{ anatomy: ElementAnatomy }> = ({ anatomy }) =>
     );
 };
 
-/**
- * 🏷️ Token Overlay
- */
 type FeedbackVariant = 'Success' | 'Warning' | 'Error' | 'Focus' | 'Signal';
 
 interface TokenBadgeProps {
@@ -182,7 +174,7 @@ const TokenBadge: React.FC<TokenBadgeProps> = ({ label, variant, x, y, targetX, 
   );
 };
 
-const TokenOverlay: React.FC<{ anatomy: ElementAnatomy; btnProps: StageButtonProps }> = ({ anatomy, btnProps }) => {
+const TokenOverlay: React.FC<{ anatomy: ElementAnatomy; btnProps: StageComponentProps }> = ({ anatomy, btnProps }) => {
   const { width, height, children, gap, padding } = anatomy;
   const PAD = 100;
   
@@ -190,28 +182,68 @@ const TokenOverlay: React.FC<{ anatomy: ElementAnatomy; btnProps: StageButtonPro
   const getTypographyToken = (s: string) => (s === 'S' ? 'Label.S' : s === 'L' ? 'Label.L' : 'Label.M');
   const getFillToken = (v: string) => (v === 'secondary' ? 'Base.Surface.2' : v === 'ghost' || v === 'outline' ? 'Transparent' : 'Accent.Surface.1');
   const getTextToken = (v: string) => (v === 'secondary' || v === 'ghost' || v === 'outline' ? 'Base.Content.1' : 'Accent.Content.1');
+  
   const getTokenVariant = (label: string): FeedbackVariant => {
     if (label.includes('Space') || label.includes('Gap')) return 'Warning';
     if (label.includes('Radius')) return 'Focus';
     if (label.includes('Color') || label.includes('Fill') || label.includes('Accent') || label.includes('Base') || label.includes('Transparent')) return 'Signal';
-    if (label.includes('Type') || label.includes('Label')) return 'Success';
+    if (label.includes('Type') || label.includes('Label') || label.includes('Headline')) return 'Success';
     return 'Error';
   };
 
-  const tokens = [
-    { label: 'Radius.Full', x: -40, y: -40, targetX: 8, targetY: 8, delay: 0.1 },
-    { label: getPaddingToken(btnProps.size), x: -60, y: height / 2, targetX: padding.left / 2, targetY: height / 2, delay: 0.2 },
-    { label: getFillToken(btnProps.variant), x: width + 50, y: height + 40, targetX: width - 20, targetY: height - 10, delay: 0.3 },
-  ];
+  const tokens = [];
 
-  if (children.text) {
-     const textCenter = children.text.x + children.text.width / 2;
-     tokens.push({ label: `Type.${getTypographyToken(btnProps.size)}`, x: textCenter, y: -50, targetX: textCenter, targetY: children.text.y + 4, delay: 0.4 });
-     tokens.push({ label: getTextToken(btnProps.variant), x: width + 60, y: height / 2 - 10, targetX: children.text.x + children.text.width - 2, targetY: children.text.y + children.text.height / 2, delay: 0.5 });
-  }
-  if (gap > 0 && children.icon) {
-     const gapCenter = children.icon.x + children.icon.width + gap / 2;
-     tokens.push({ label: 'Space.S', x: gapCenter, y: height + 50, targetX: gapCenter, targetY: height / 2, delay: 0.6 });
+  if (btnProps.componentType === 'button') {
+    // 1. Radius
+    tokens.push({ label: 'Radius.Full', x: -40, y: -40, targetX: 8, targetY: 8, delay: 0.1 });
+    
+    // 2. Padding
+    tokens.push({ label: getPaddingToken(btnProps.size), x: -60, y: height / 2, targetX: padding.left / 2, targetY: height / 2, delay: 0.2 });
+    
+    // 3. Fill Color
+    tokens.push({ label: getFillToken(btnProps.variant), x: width + 60, y: height + 60, targetX: width - 20, targetY: height - 10, delay: 0.3 });
+    
+    // 4. Content Color (Restored)
+    tokens.push({ label: getTextToken(btnProps.variant), x: width + 60, y: height / 2, targetX: width - 12, targetY: height / 2, delay: 0.4 });
+
+    // 5. Icon
+    if (children.icon) {
+        tokens.push({ label: 'Icon', x: -40, y: height + 40, targetX: children.icon.x + children.icon.width / 2, targetY: children.icon.y + children.icon.height, delay: 0.5 });
+    }
+
+    // 6. Gap
+    if (children.icon && children.text && gap > 0) {
+        const gapX = children.icon.x + children.icon.width + gap / 2;
+        tokens.push({ label: 'Space.S', x: gapX, y: height + 60, targetX: gapX, targetY: height - 12, delay: 0.6 });
+    }
+
+    // 7. Typography
+    if (children.text) {
+        const textCenter = children.text.x + children.text.width / 2;
+        tokens.push({ label: `Type.${getTypographyToken(btnProps.size)}`, x: textCenter, y: -50, targetX: textCenter, targetY: children.text.y + 4, delay: 0.7 });
+    }
+  } else {
+    // Card Tokens
+    tokens.push({ label: 'Radius.L', x: -40, y: -40, targetX: 12, targetY: 12, delay: 0.1 });
+    tokens.push({ label: 'Space.XL', x: -60, y: 100, targetX: padding.left / 2, targetY: 100, delay: 0.2 });
+    
+    // Fill
+    tokens.push({ label: 'Base.Surface.1', x: width + 60, y: height + 60, targetX: width - 20, targetY: height - 10, delay: 0.3 });
+    
+    // Content Color (Restored for Title)
+    if (children.title) {
+        const titleY = children.title.y + children.title.height / 2;
+        tokens.push({ label: getTextToken(btnProps.variant), x: width + 60, y: titleY, targetX: width - 20, targetY: titleY, delay: 0.4 });
+    }
+
+    if (children.media) {
+        tokens.push({ label: 'Base.Surface.2', x: -40, y: 200, targetX: children.media.x + 20, targetY: children.media.y + 20, delay: 0.5 });
+    }
+
+    if (children.title) {
+        const textCenter = children.title.x + children.title.width / 2;
+        tokens.push({ label: 'Type.Headline.S', x: textCenter, y: -50, targetX: textCenter, targetY: children.title.y + 10, delay: 0.6 });
+    }
   }
 
   return (
@@ -225,15 +257,8 @@ const TokenOverlay: React.FC<{ anatomy: ElementAnatomy; btnProps: StageButtonPro
   );
 };
 
-interface HUDItemProps {
-    layer: { label: string; stroke: string; fill: string };
-    gap: MotionValue<number>;
-    isLast: boolean;
-}
-
-const HUDItem: React.FC<HUDItemProps> = ({ layer, gap, isLast }) => {
+const HUDItem = ({ layer, gap, isLast }: { layer: any, gap: MotionValue<number>, isLast: boolean }) => {
     const { theme } = useTheme();
-    
     return (
         <motion.div style={{
             marginBottom: isLast ? 0 : gap,
@@ -242,33 +267,18 @@ const HUDItem: React.FC<HUDItemProps> = ({ layer, gap, isLast }) => {
             justifyContent: 'flex-start',
             gap: '12px'
         }}>
-           {/* Connector Dot - Matches TokenBadge Circle */}
            <div style={{ 
-               width: 6, 
-               height: 6, 
-               borderRadius: '50%', 
-               backgroundColor: layer.fill,
+               width: 6, height: 6, borderRadius: '50%', backgroundColor: layer.fill,
                border: `1.5px solid ${layer.stroke}`,
                boxShadow: theme.effects['Effect.Shadow.Drop.1'],
                flexShrink: 0
            }} />
-           
-           {/* Label Badge - Matches TokenBadge Rect/Text */}
            <span style={{ 
                fontFamily: theme.Type.Expressive.Data.fontFamily,
-               fontSize: '10px',
-               fontWeight: 'bold',
-               color: layer.stroke,
-               backgroundColor: layer.fill,
-               padding: '0 8px',
-               height: '20px',
-               borderRadius: '10px', // Pill shape
-               border: `1px solid ${layer.stroke}`,
-               whiteSpace: 'nowrap',
-               display: 'flex',
-               alignItems: 'center',
-               justifyContent: 'center',
-               lineHeight: 1
+               fontSize: '10px', fontWeight: 'bold', color: layer.stroke,
+               backgroundColor: layer.fill, padding: '0 8px', height: '20px',
+               borderRadius: '10px', border: `1px solid ${layer.stroke}`,
+               whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1
            }}>
                {layer.label}
            </span>
@@ -276,19 +286,12 @@ const HUDItem: React.FC<HUDItemProps> = ({ layer, gap, isLast }) => {
     );
 }
 
-/**
- * 🥞 Layer Stack HUD (2D Overlay)
- * A visual legend that expands vertically to mirror the 3D layer separation.
- */
-const LayerStackHUD = ({ layerSpacing }: { layerSpacing: MotionValue<number> }) => {
+const LayerStackHUD = ({ layerSpacing, isCard }: { layerSpacing: MotionValue<number>, isCard: boolean }) => {
     const { theme } = useTheme();
-    
-    // Map 3D spacing (0-150) to 2D UI spacing (4-32)
     const gap = useTransform(layerSpacing, [0, 150], [4, 32]);
     
-    // Layers ordered from Top (Index 0) to Bottom (Index 3)
-    // Updated to use semantic feedback colors
     const layers = [
+        ...(isCard ? [{ label: 'Media Layer', stroke: theme.Color.Signal.Content[1], fill: theme.Color.Signal.Surface[1] }] : []),
         { label: 'Content Layer', stroke: theme.Color.Success.Content[1], fill: theme.Color.Success.Surface[1] },
         { label: 'Ripple Layer', stroke: theme.Color.Focus.Content[1], fill: theme.Color.Focus.Surface[1] },
         { label: 'State Layer', stroke: theme.Color.Signal.Content[1], fill: theme.Color.Signal.Surface[1] },
@@ -298,14 +301,14 @@ const LayerStackHUD = ({ layerSpacing }: { layerSpacing: MotionValue<number> }) 
     return (
         <motion.div
             initial={{ opacity: 0, x: 200 }} 
-            animate={{ opacity: 1, x: 180 }}
+            animate={{ opacity: 1, x: 220 }}
             exit={{ opacity: 0, x: 200 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             style={{
                 position: 'absolute',
                 top: '50%',
                 left: '50%',
-                y: '-50%', // Centered vertically
+                y: '-50%',
                 display: 'flex',
                 flexDirection: 'column', 
                 pointerEvents: 'none',
@@ -316,7 +319,6 @@ const LayerStackHUD = ({ layerSpacing }: { layerSpacing: MotionValue<number> }) 
                 ...theme.Type.Readable.Label.S, 
                 color: theme.Color.Base.Content[3], 
                 marginBottom: theme.spacing['Space.S'], 
-                textAlign: 'left', // Align with the badges
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em',
                 paddingLeft: '20px' 
@@ -324,18 +326,11 @@ const LayerStackHUD = ({ layerSpacing }: { layerSpacing: MotionValue<number> }) 
                 Layer Stack
             </span>
             {layers.map((layer, i) => (
-                <HUDItem 
-                    key={layer.label} 
-                    layer={layer} 
-                    gap={gap} 
-                    isLast={i === layers.length - 1} 
-                />
+                <HUDItem key={layer.label} layer={layer} gap={gap} isLast={i === layers.length - 1} />
             ))}
         </motion.div>
     );
 };
-
-// --- MAIN COMPONENT ---
 
 const Stage: React.FC<StageProps> = ({ 
     btnProps, 
@@ -347,12 +342,14 @@ const Stage: React.FC<StageProps> = ({
     viewRotateZ,
     layerSpacing 
 }) => {
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  
-  // Invert the Horizontal Rotation logic (Pass negative to rotateZ)
+  const componentRef = useRef<any>(null);
   const containerRotateZ = useTransform(viewRotateZ, v => -v);
 
-  const anatomy = useElementAnatomy(buttonRef, { icon: 'i', text: 'span' }, [btnProps, showMeasurements, showTokens, view3D]);
+  const buttonSelectors = { icon: 'i', text: 'span' };
+  const cardSelectors = { media: '.card-media', title: '.card-title', body: '.card-body', label: 'span' };
+  
+  const selectors = btnProps.componentType === 'card' ? cardSelectors : buttonSelectors;
+  const anatomy = useElementAnatomy(componentRef, selectors, [btnProps, showMeasurements, showTokens, view3D]);
 
   return (
     <div style={{ 
@@ -372,24 +369,33 @@ const Stage: React.FC<StageProps> = ({
                 transformStyle: 'preserve-3d',
                 rotateX: view3D ? viewRotateX : 0,
                 rotateZ: view3D ? containerRotateZ : 0,
-                scale: 1.5,
+                scale: btnProps.componentType === 'card' ? 1.0 : 1.5,
             }}
             transition={{ type: 'spring', damping: 20, stiffness: 100 }}
         >
-            <Button 
-                ref={buttonRef} 
-                {...btnProps} 
-                onClick={onButtonClick} 
-                layerSpacing={layerSpacing}
-                view3D={view3D}
-            />
+            {btnProps.componentType === 'button' ? (
+                <Button 
+                    ref={componentRef} 
+                    {...btnProps} 
+                    onClick={onButtonClick} 
+                    layerSpacing={layerSpacing}
+                    view3D={view3D}
+                />
+            ) : (
+                <Card 
+                    ref={componentRef}
+                    {...btnProps}
+                    onClick={onButtonClick}
+                    layerSpacing={layerSpacing}
+                    view3D={view3D}
+                />
+            )}
             {showMeasurements && anatomy && <BlueprintOverlay anatomy={anatomy} />}
             {showTokens && anatomy && <TokenOverlay anatomy={anatomy} btnProps={btnProps} />}
         </motion.div>
 
-        {/* 2D Layer HUD Overlay */}
         <AnimatePresence>
-            {view3D && <LayerStackHUD layerSpacing={layerSpacing} />}
+            {view3D && <LayerStackHUD layerSpacing={layerSpacing} isCard={btnProps.componentType === 'card'} />}
         </AnimatePresence>
     </div>
   );

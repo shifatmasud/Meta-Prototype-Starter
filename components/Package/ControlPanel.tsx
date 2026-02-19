@@ -70,55 +70,81 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
     onPropChange(updates);
   };
 
+  const isButton = btnProps.componentType === 'button';
+  const isGhost = isButton && btnProps.variant === 'ghost';
+
   return (
     <>
-      <Input
-        label="Label"
-        value={btnProps.label}
-        onChange={(e) => onPropChange('label', e.target.value)}
+      <Select
+        label="Component Type"
+        value={btnProps.componentType}
+        onChange={(e) => onPropChange({ 
+            componentType: e.target.value,
+            customRadius: e.target.value === 'card' ? '24px' : '56px',
+            variant: e.target.value === 'card' ? 'secondary' : 'primary'
+        })}
+        options={[
+          { value: 'button', label: 'Button (Core)' },
+          { value: 'card', label: 'Card (Package)' },
+        ]}
       />
-      <div style={{ display: 'flex', gap: theme.spacing['Space.M'], marginTop: theme.spacing['Space.L'] }}>
-        <div style={{ flex: 1 }}>
-          <Select
-            label="Variant"
-            value={btnProps.variant}
-            onChange={(e) => onPropChange('variant', e.target.value)}
-            options={[
-              { value: 'primary', label: 'Primary' },
-              { value: 'secondary', label: 'Secondary' },
-              { value: 'ghost', label: 'Ghost' },
-              { value: 'outline', label: 'Outline' },
-            ]}
-          />
-        </div>
-        <div style={{ flex: 1 }}>
-          <Select
-            label="Size"
-            value={btnProps.size}
-            onChange={(e) => onPropChange('size', e.target.value)}
-            options={[
-              { value: 'S', label: 'Small (S)' },
-              { value: 'M', label: 'Medium (M)' },
-              { value: 'L', label: 'Large (L)' },
-            ]}
-          />
-        </div>
-      </div>
+
       <div style={{ marginTop: theme.spacing['Space.L'] }}>
-          <Select
-            label="Icon (Phosphor)"
-            value={btnProps.icon || ''}
-            onChange={(e) => onPropChange('icon', e.target.value)}
-            options={[
-                { value: '', label: 'None' },
-                { value: 'ph-sparkle', label: 'Sparkle' },
-                { value: 'ph-heart', label: 'Heart' },
-                { value: 'ph-bell', label: 'Bell' },
-                { value: 'ph-rocket', label: 'Rocket' },
-                { value: 'ph-gear', label: 'Gear' },
-            ]}
+          <Input
+            label={isButton ? "Label" : "Title"}
+            value={btnProps.label}
+            onChange={(e) => onPropChange('label', e.target.value)}
           />
       </div>
+
+      {isButton && (
+        <div style={{ display: 'flex', gap: theme.spacing['Space.M'], marginTop: theme.spacing['Space.L'] }}>
+          <div style={{ flex: 1 }}>
+            <Select
+              label="Variant"
+              value={btnProps.variant}
+              onChange={(e) => onPropChange('variant', e.target.value)}
+              options={[
+                { value: 'primary', label: 'Primary' },
+                { value: 'secondary', label: 'Secondary' },
+                { value: 'ghost', label: 'Ghost' },
+                { value: 'outline', label: 'Outline' },
+              ]}
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <Select
+              label="Size"
+              value={btnProps.size}
+              onChange={(e) => onPropChange('size', e.target.value)}
+              options={[
+                { value: 'S', label: 'Small (S)' },
+                { value: 'M', label: 'Medium (M)' },
+                { value: 'L', label: 'Large (L)' },
+              ]}
+            />
+          </div>
+        </div>
+      )}
+
+      {isButton && (
+          <div style={{ marginTop: theme.spacing['Space.L'] }}>
+              <Select
+                label="Icon (Phosphor)"
+                value={btnProps.icon || ''}
+                onChange={(e) => onPropChange('icon', e.target.value)}
+                options={[
+                    { value: '', label: 'None' },
+                    { value: 'ph-sparkle', label: 'Sparkle' },
+                    { value: 'ph-heart', label: 'Heart' },
+                    { value: 'ph-bell', label: 'Bell' },
+                    { value: 'ph-rocket', label: 'Rocket' },
+                    { value: 'ph-gear', label: 'Gear' },
+                ]}
+              />
+          </div>
+      )}
+
       <div style={{ marginTop: theme.spacing['Space.L'] }}>
           <RangeSlider
             label="Corner Radius"
@@ -128,15 +154,19 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             max={56}
           />
       </div>
+      
       <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing['Space.M'], marginTop: theme.spacing['Space.L'], width: '100%' }}>
-        <ColorPicker
-          label="Fill Color"
-          value={btnProps.customFill || (themeName === 'dark' ? '#ffffff' : '#000000')}
-          onChange={(e) => onPropChange('customFill', e.target.value)}
-        />
+        {/* Fill Color Picker is hidden for Ghost variant as it's defined as having no fill color */}
+        {!isGhost && (
+          <ColorPicker
+            label="Fill Color"
+            value={btnProps.customFill || (btnProps.variant === 'primary' ? (themeName === 'dark' ? '#ffffff' : '#111111') : (btnProps.componentType === 'card' ? theme.Color.Base.Surface[1] : 'transparent'))}
+            onChange={(e) => onPropChange('customFill', e.target.value)}
+          />
+        )}
         <ColorPicker
           label="Text Color"
-          value={btnProps.customColor || (themeName === 'dark' ? '#000000' : '#ffffff')}
+          value={btnProps.customColor || (btnProps.variant === 'primary' ? (themeName === 'dark' ? '#000000' : '#ffffff') : (themeName === 'dark' ? '#ffffff' : '#111111'))}
           onChange={(e) => onPropChange('customColor', e.target.value)}
         />
       </div>

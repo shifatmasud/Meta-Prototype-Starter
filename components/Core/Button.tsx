@@ -149,9 +149,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
         };
       case 'ghost':
         return {
-          background: 'transparent',
+          background: 'transparent', // Ghost variant has no fill
           color: baseContent,
           border: 'none',
+          boxShadow: 'none',
         };
       default:
         return {
@@ -233,9 +234,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
   const getDebugBorder = (color: string) => view3D ? `1px solid ${color}` : 'none';
 
   // Calculate Animate Props for Premium Feel
-  // Separated Focus from this logic to avoid box-shadow interpolation bugs
   const getAnimateState = () => {
     if (disabled) return { y: 0, scale: 1, boxShadow: 'none' };
+    
+    const isGhost = variant === 'ghost';
     
     // Active (Pressed)
     if (forcedActive) {
@@ -248,11 +250,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
     
     // Hover (Mouse)
     if (effectiveHover) {
-         const isGhost = variant === 'ghost';
          return {
             y: -4, // Bolder lift
             scale: 1.05, // Bolder scale
-            // Ensure hover state has more elevation (Drop.3)
+            // Ghost variant has no shadow even on hover
             boxShadow: isGhost ? 'none' : theme.effects['Effect.Shadow.Drop.3']
          };
     }
@@ -261,7 +262,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
     return { 
         y: 0, 
         scale: 1, 
-        boxShadow: variantStyles.boxShadow || 'none' 
+        // Ghost variant has no shadow
+        boxShadow: isGhost ? 'none' : (variantStyles.boxShadow || 'none') 
     };
   };
 

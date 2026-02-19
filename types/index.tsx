@@ -24,8 +24,12 @@ export interface LogEntry {
   message: string;
 }
 
-// --- Button Props for Meta Prototype ---
+// --- Component Type ---
+export type ComponentType = 'button' | 'card';
+
+// --- Props for Meta Prototype ---
 export interface MetaButtonProps {
+    componentType: ComponentType;
     label: string;
     variant: ButtonVariant;
     size: ButtonSize;

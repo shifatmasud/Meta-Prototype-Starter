@@ -6,6 +6,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { type MotionValue } from 'framer-motion';
 import { useTheme } from '../../Theme.tsx';
+import AnimatedCounter from './AnimatedCounter.tsx';
 
 interface RangeSliderProps {
   label: string;
@@ -36,6 +37,7 @@ const RangeSlider: React.FC<RangeSliderProps> = ({
   });
   
   const [isDragging, setIsDragging] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   // Sync internal state with external motion value updates (e.g. undo/redo)
   useEffect(() => {
@@ -78,20 +80,62 @@ const RangeSlider: React.FC<RangeSliderProps> = ({
     }
   };
 
+  const handleCommit = () => {
+    setIsEditing(false);
+    onCommit(internalValue);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = parseInt(e.target.value, 10) || min;
+    const clamped = Math.min(Math.max(v, min), max);
+    setInternalValue(clamped);
+    motionValue.set(clamped);
+    if (onChange) onChange(clamped);
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === 'Escape') {
+      handleCommit();
+      (e.target as HTMLInputElement).blur();
+    }
+  };
+
   const percentage = Math.max(0, Math.min(100, ((internalValue - min) / (max - min)) * 100));
 
-  const numberInputStyle: React.CSSProperties = {
+  const numberInputContainerStyle: React.CSSProperties = {
     width: '60px',
-    padding: theme.spacing['Space.XS'],
-    borderRadius: theme.radius['Radius.S'],
-    border: `1px solid ${theme.Color.Base.Surface[3]}`,
-    backgroundColor: theme.Color.Base.Surface[2],
-    color: theme.Color.Base.Content[1],
+    height: '24px',
+    position: 'relative',
     fontFamily: theme.Type.Readable.Body.M.fontFamily,
     fontSize: '14px',
     textAlign: 'center',
+    color: theme.Color.Base.Content[1],
+  };
+  
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    height: '100%',
+    boxSizing: 'border-box',
+    padding: `0 ${theme.spacing['Space.XS']}`,
+    borderRadius: theme.radius['Radius.S'],
+    border: `1px solid ${theme.Color.Base.Surface[3]}`,
+    backgroundColor: theme.Color.Base.Surface[2],
+    color: 'inherit',
+    fontFamily: 'inherit',
+    fontSize: 'inherit',
+    textAlign: 'inherit',
     outline: 'none',
   };
+
+  const animatedCounterWrapperStyle: React.CSSProperties = {
+    ...inputStyle,
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontVariantNumeric: 'tabular-nums',
+  };
+
 
   return (
     <div onPointerDown={(e) => e.stopPropagation()}>
@@ -157,21 +201,28 @@ const RangeSlider: React.FC<RangeSliderProps> = ({
         </div>
 
         {/* Number Input */}
-        <input
-          type="number"
-          min={min}
-          max={max}
-          value={internalValue}
-          onChange={(e) => {
-             const v = parseInt(e.target.value, 10) || 0;
-             const clamped = Math.min(Math.max(v, min), max);
-             setInternalValue(clamped);
-             motionValue.set(clamped);
-             if (onChange) onChange(clamped);
-          }}
-          onBlur={() => onCommit(internalValue)}
-          style={numberInputStyle}
-        />
+        <div style={numberInputContainerStyle}>
+          {isEditing ? (
+            <input
+              type="number"
+              min={min}
+              max={max}
+              value={Math.round(internalValue)}
+              onChange={handleInputChange}
+              onBlur={handleCommit}
+              onKeyDown={handleInputKeyDown}
+              autoFocus
+              style={inputStyle}
+            />
+          ) : (
+            <div
+              style={animatedCounterWrapperStyle}
+              onClick={() => setIsEditing(true)}
+            >
+              <AnimatedCounter value={Math.round(internalValue)} useFormatting={false} />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

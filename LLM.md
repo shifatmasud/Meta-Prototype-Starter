@@ -13,6 +13,7 @@ Hello! You are an AI assistant helping to build this React application. Here are
 -   `hooks/useElementAnatomy.tsx`
 -   `types/index.tsx`
 -   `components/App/MetaPrototype.tsx`
+-   `components/Core/AnimatedCounter.tsx`
 -   `components/Core/Button.tsx`
 -   `components/Core/ColorPicker.tsx`
 -   `components/Core/DockIcon.tsx`

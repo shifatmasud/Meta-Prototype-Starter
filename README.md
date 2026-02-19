@@ -52,6 +52,7 @@ Imagine you're building with LEGOs. This project gives you a super organized box
 │   ├── App/
 │   │   └── MetaPrototype.tsx
 │   ├── Core/
+│   │   ├── AnimatedCounter.tsx
 │   │   ├── Button.tsx
 │   │   ├── ColorPicker.tsx
 │   │   ├── Confetti.tsx

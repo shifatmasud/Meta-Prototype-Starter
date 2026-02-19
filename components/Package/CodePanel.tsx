@@ -2,11 +2,12 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../../Theme.tsx';
 import TextArea from '../Core/TextArea.tsx';
 import { MetaButtonProps } from '../../types/index.tsx';
+import { AnimatedCopyIcon } from '../Core/AnimatedCopyIcon.tsx';
 
 interface CodePanelProps {
   codeText: string;
@@ -19,13 +20,22 @@ interface CodePanelProps {
 
 const CodePanel: React.FC<CodePanelProps> = ({ codeText, onCodeChange, onCopyCode, onFocus, onBlur, btnProps }) => {
   const { theme } = useTheme();
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleCopyClick = () => {
+    onCopyCode();
+    setIsCopied(true);
+    setTimeout(() => {
+      setIsCopied(false);
+    }, 2000);
+  };
 
   return (
     <>
       <div style={{ position: 'relative' }}>
         <TextArea value={codeText} onChange={onCodeChange} onFocus={onFocus} onBlur={onBlur} />
         <motion.button
-          onClick={onCopyCode}
+          onClick={handleCopyClick}
           style={{
             position: 'absolute',
             top: theme.spacing['Space.S'],
@@ -33,7 +43,7 @@ const CodePanel: React.FC<CodePanelProps> = ({ codeText, onCodeChange, onCopyCod
             background: theme.Color.Base.Surface[1],
             border: `1px solid ${theme.Color.Base.Surface[3]}`,
             borderRadius: theme.radius['Radius.S'],
-            padding: '4px',
+            padding: '6px',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -42,10 +52,10 @@ const CodePanel: React.FC<CodePanelProps> = ({ codeText, onCodeChange, onCopyCod
           }}
           whileHover={{ scale: 1.1, backgroundColor: theme.Color.Accent.Surface[1], color: theme.Color.Accent.Content[1] }}
           whileTap={{ scale: 0.9 }}
-          aria-label="Copy JSON"
+          aria-label={isCopied ? 'Copied!' : 'Copy JSON'}
           onPointerDown={(e) => e.stopPropagation()}
         >
-          <i className="ph-bold ph-copy" style={{ fontSize: '14px' }} />
+          <AnimatedCopyIcon isCopied={isCopied} />
         </motion.button>
       </div>
       <div style={{ marginTop: theme.spacing['Space.L'] }}>

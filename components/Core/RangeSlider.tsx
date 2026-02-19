@@ -1,3 +1,4 @@
+
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -27,7 +28,13 @@ const RangeSlider: React.FC<RangeSliderProps> = ({
 }) => {
   const { theme } = useTheme();
   const trackRef = useRef<HTMLDivElement>(null);
-  const [internalValue, setInternalValue] = useState(motionValue.get());
+  
+  // Use a fallback for the initial value to avoid NaN in calculations
+  const [internalValue, setInternalValue] = useState(() => {
+    const val = motionValue.get();
+    return typeof val === 'number' ? val : min;
+  });
+  
   const [isDragging, setIsDragging] = useState(false);
 
   // Sync internal state with external motion value updates (e.g. undo/redo)
@@ -71,7 +78,7 @@ const RangeSlider: React.FC<RangeSliderProps> = ({
     }
   };
 
-  const percentage = ((internalValue - min) / (max - min)) * 100;
+  const percentage = Math.max(0, Math.min(100, ((internalValue - min) / (max - min)) * 100));
 
   const numberInputStyle: React.CSSProperties = {
     width: '60px',
@@ -113,8 +120,8 @@ const RangeSlider: React.FC<RangeSliderProps> = ({
                 position: 'relative', 
                 width: '100%', 
                 height: '6px', 
-                backgroundColor: trackBackground ? 'transparent' : theme.Color.Base.Surface[3], 
-                background: trackBackground || undefined,
+                // Use the shorthand 'background' solely to avoid conflicts with 'backgroundColor'
+                background: trackBackground || theme.Color.Base.Surface[3],
                 borderRadius: '3px',
                 overflow: 'visible' 
             }}>

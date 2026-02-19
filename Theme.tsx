@@ -1,3 +1,4 @@
+
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -31,7 +32,7 @@ const lightThemeColors = {
 const darkThemeColors = {
   Color: {
     Base: {
-      Surface: { '1': '#121212', '2': '#1E1E1E', '3': '#282828' },
+      Surface: { '1': '#121212', '2': '#1E1E1E', '3': '#333333' }, // Brightened from #282828 for better track visibility
       Content: { '1': '#E0E0E0', '2': '#AAAAAA', '3': '#777777' }
     },
     Accent: {
@@ -119,7 +120,7 @@ const resolveTokens = (obj: any, breakpoint: Breakpoint): any => {
 
 // --- GLOBAL STYLES & THEME PROVIDER ---
 
-const GlobalStyles = () => { /* ... (no changes needed) ... */
+const GlobalStyles = () => {
     const globalCss = `
       *, *::before, *::after { box-sizing: border-box; }
       html, body, #root { height: 100%; margin: 0; padding: 0; font-family: ${typography.Type.Readable.Body.M.fontFamily}; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }

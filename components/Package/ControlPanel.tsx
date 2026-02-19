@@ -80,7 +80,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         value={btnProps.componentType}
         onChange={(e) => onPropChange({ 
             componentType: e.target.value,
-            customRadius: e.target.value === 'card' ? '24px' : '56px',
+            customRadius: e.target.value === 'card' ? '40px' : '56px',
             variant: e.target.value === 'card' ? 'secondary' : 'primary'
         })}
         options={[

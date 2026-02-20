@@ -10,7 +10,7 @@ import RippleLayer, { Ripple } from '../Core/RippleLayer.tsx';
 
 interface CardProps {
   label: string; // Used as title
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'outline' | 'tertiary';
   customFill?: string;
   customColor?: string;
   customRadius?: string | MotionValue<string>;

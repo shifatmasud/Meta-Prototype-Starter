@@ -24,6 +24,9 @@ export interface LogEntry {
   message: string;
 }
 
+// --- Feedback Variant ---
+export type FeedbackVariant = 'Success' | 'Warning' | 'Error' | 'Focus' | 'Signal';
+
 // --- Component Type ---
 export type ComponentType = 'button' | 'card';
 

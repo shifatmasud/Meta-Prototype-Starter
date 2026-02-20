@@ -71,7 +71,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   };
 
   const isButton = btnProps.componentType === 'button';
-  const isGhost = isButton && btnProps.variant === 'ghost';
+  const isTertiary = isButton && btnProps.variant === 'tertiary';
 
   return (
     <>
@@ -107,7 +107,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               options={[
                 { value: 'primary', label: 'Primary' },
                 { value: 'secondary', label: 'Secondary' },
-                { value: 'ghost', label: 'Ghost' },
+                { value: 'tertiary', label: 'Tertiary' },
                 { value: 'outline', label: 'Outline' },
               ]}
             />
@@ -157,7 +157,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
       
       <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing['Space.M'], marginTop: theme.spacing['Space.L'], width: '100%' }}>
         {/* Fill Color Picker is hidden for Ghost variant as it's defined as having no fill color */}
-        {!isGhost && (
+        {!isTertiary && (
           <ColorPicker
             label="Fill Color"
             value={btnProps.customFill || (btnProps.variant === 'primary' ? (themeName === 'dark' ? '#ffffff' : '#111111') : (btnProps.componentType === 'card' ? theme.Color.Base.Surface[1] : 'transparent'))}

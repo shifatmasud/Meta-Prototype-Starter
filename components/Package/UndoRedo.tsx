@@ -30,7 +30,7 @@ const UndoRedo: React.FC<UndoRedoProps> = ({ onUndo, onRedo, canUndo, canRedo })
         label=""
         icon="ph-arrow-u-up-left"
         size="S"
-        variant="ghost"
+        variant="tertiary"
         disabled={!canUndo}
         onClick={onUndo}
       />
@@ -38,7 +38,7 @@ const UndoRedo: React.FC<UndoRedoProps> = ({ onUndo, onRedo, canUndo, canRedo })
         label=""
         icon="ph-arrow-u-up-right"
         size="S"
-        variant="ghost"
+        variant="tertiary"
         disabled={!canRedo}
         onClick={onRedo}
       />

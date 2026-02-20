@@ -8,7 +8,7 @@ import { motion, type MotionValue, useTransform, useMotionValue } from 'framer-m
 import StateLayer from './StateLayer.tsx';
 import RippleLayer, { Ripple } from './RippleLayer.tsx';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'outline';
+export type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'outline';
 export type ButtonSize = 'S' | 'M' | 'L';
 
 interface ButtonProps {
@@ -147,9 +147,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
           color: baseContent,
           border: `1px solid ${theme.Color.Base.Content[3]}`,
         };
-      case 'ghost':
+      case 'tertiary':
         return {
-          background: 'transparent', // Ghost variant has no fill
+          background: 'transparent',
           color: baseContent,
           border: 'none',
           boxShadow: 'none',
@@ -237,7 +237,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
   const getAnimateState = () => {
     if (disabled) return { y: 0, scale: 1, boxShadow: 'none' };
     
-    const isGhost = variant === 'ghost';
+    const isTertiary = variant === 'tertiary';
     
     // Active (Pressed)
     if (forcedActive) {
@@ -254,7 +254,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
             y: -4, // Bolder lift
             scale: 1.05, // Bolder scale
             // Ghost variant has no shadow even on hover
-            boxShadow: isGhost ? 'none' : theme.effects['Effect.Shadow.Drop.3']
+            boxShadow: isTertiary ? 'none' : theme.effects['Effect.Shadow.Drop.3']
          };
     }
     
@@ -263,7 +263,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
         y: 0, 
         scale: 1, 
         // Ghost variant has no shadow
-        boxShadow: isGhost ? 'none' : (variantStyles.boxShadow || 'none') 
+        boxShadow: isTertiary ? 'none' : (variantStyles.boxShadow || 'none') 
     };
   };
 

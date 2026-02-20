@@ -195,13 +195,11 @@ const MetaPrototype = () => {
 
   const handleToggleMeasurements = () => {
     setShowMeasurements(prev => !prev);
-    if (showTokens) setShowTokens(false);
     logEvent(`Measurements toggled: ${!showMeasurements ? 'On' : 'Off'}`);
   };
 
   const handleToggleTokens = () => {
     setShowTokens(prev => !prev);
-    if (showMeasurements) setShowMeasurements(false);
     logEvent(`Tokens toggled: ${!showTokens ? 'On' : 'Off'}`);
   };
   

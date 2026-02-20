@@ -3,12 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { useRef } from 'react';
-import { motion, MotionValue, useTransform, AnimatePresence } from 'framer-motion';
+import { motion, MotionValue, useTransform, AnimatePresence, motionValue } from 'framer-motion';
 import { useTheme } from '../../Theme.tsx';
 import Button from '../Core/Button.tsx';
 import Card from '../Package/Card.tsx';
-import { MetaButtonProps } from '../../types/index.tsx';
+import { MetaButtonProps, FeedbackVariant } from '../../types/index.tsx';
 import { useElementAnatomy, ElementAnatomy, NormalizedRect } from '../../hooks/useElementAnatomy.tsx';
+import { useMemo } from 'react';
+import TokenBadge from '../Package/TokenBadge.tsx';
+import TokenConnector from '../Package/TokenConnector.tsx';
 
 // --- HELPER TYPES & COMPONENTS ---
 
@@ -135,124 +138,89 @@ const BlueprintOverlay: React.FC<{ anatomy: ElementAnatomy }> = ({ anatomy }) =>
     );
 };
 
-type FeedbackVariant = 'Success' | 'Warning' | 'Error' | 'Focus' | 'Signal';
 
-interface TokenBadgeProps {
-  label: string;
-  variant: FeedbackVariant;
-  x: number;
-  y: number;
-  targetX: number;
-  targetY: number;
-  delay: number;
-}
 
-const TokenBadge: React.FC<TokenBadgeProps> = ({ label, variant, x, y, targetX, targetY, delay }) => {
-  const { theme } = useTheme();
-  const colors = theme.Color[variant];
-  const strokeColor = colors.Content[1];
-  const fillColor = colors.Surface[1];
-  const cp1x = x;
-  const cp1y = targetY;
-  
-  return (
-    <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay, duration: 0.4 }}>
-      <motion.path
-        d={`M ${x} ${y} C ${cp1x} ${cp1y}, ${targetX} ${y}, ${targetX} ${targetY}`}
-        fill="none" stroke={strokeColor} strokeWidth="1.5" strokeDasharray="4 2"
-        initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: delay + 0.2, duration: 0.4 }}
-      />
-      <motion.circle
-        cx={targetX} cy={targetY} r="3" fill={fillColor} stroke={strokeColor} strokeWidth="1.5"
-        initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: delay + 0.5, type: 'spring' }}
-      />
-      <motion.g initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay, type: 'spring' }}>
-        <rect x={x - (label.length * 3.5 + 8)} y={y - 10} width={label.length * 7 + 16} height="20" rx="10" fill={fillColor} stroke={strokeColor} strokeWidth="1" />
-        <text x={x} y={y} fill={strokeColor} fontSize="10" fontFamily={theme.Type.Expressive.Data.fontFamily} fontWeight="bold" textAnchor="middle" dominantBaseline="middle">{label}</text>
-      </motion.g>
-    </motion.g>
-  );
+
+
+
+
+const getPaddingToken = (s: string) => (s === 'S' ? 'Space.M' : s === 'L' ? 'Space.XL' : 'Space.L');
+const getTypographyToken = (s: string) => (s === 'S' ? 'Label.S' : s === 'L' ? 'Label.L' : 'Label.M');
+const getFillToken = (v: string) => (v === 'secondary' ? 'Base.Surface.2' : v === 'tertiary' || v === 'outline' ? 'Transparent' : 'Accent.Surface.1');
+const getTextToken = (v: string) => (v === 'secondary' || v === 'tertiary' || v === 'outline' ? 'Base.Content.1' : 'Accent.Content.1');
+
+const getTokenVariant = (label: string): FeedbackVariant => {
+  if (label.includes('Space') || label.includes('Gap')) return 'Warning';
+  if (label.includes('Radius')) return 'Focus';
+  if (label.includes('Color') || label.includes('Fill') || label.includes('Accent') || label.includes('Base') || label.includes('Transparent')) return 'Signal';
+  if (label.includes('Type') || label.includes('Label') || label.includes('Headline')) return 'Success';
+  return 'Error';
 };
 
 const TokenOverlay: React.FC<{ anatomy: ElementAnatomy; btnProps: StageComponentProps }> = ({ anatomy, btnProps }) => {
   const { width, height, children, gap, padding } = anatomy;
   const PAD = 100;
-  
-  const getPaddingToken = (s: string) => (s === 'S' ? 'Space.M' : s === 'L' ? 'Space.XL' : 'Space.L');
-  const getTypographyToken = (s: string) => (s === 'S' ? 'Label.S' : s === 'L' ? 'Label.L' : 'Label.M');
-  const getFillToken = (v: string) => (v === 'secondary' ? 'Base.Surface.2' : v === 'ghost' || v === 'outline' ? 'Transparent' : 'Accent.Surface.1');
-  const getTextToken = (v: string) => (v === 'secondary' || v === 'ghost' || v === 'outline' ? 'Base.Content.1' : 'Accent.Content.1');
-  
-  const getTokenVariant = (label: string): FeedbackVariant => {
-    if (label.includes('Space') || label.includes('Gap')) return 'Warning';
-    if (label.includes('Radius')) return 'Focus';
-    if (label.includes('Color') || label.includes('Fill') || label.includes('Accent') || label.includes('Base') || label.includes('Transparent')) return 'Signal';
-    if (label.includes('Type') || label.includes('Label') || label.includes('Headline')) return 'Success';
-    return 'Error';
-  };
 
-  const tokens = [];
+  const tokens = useMemo(() => {
+    const tokenData = [];
 
-  if (btnProps.componentType === 'button') {
-    // 1. Radius
-    tokens.push({ label: 'Radius.Full', x: -40, y: -40, targetX: 8, targetY: 8, delay: 0.1 });
-    
-    // 2. Padding
-    tokens.push({ label: getPaddingToken(btnProps.size), x: -60, y: height / 2, targetX: padding.left / 2, targetY: height / 2, delay: 0.2 });
-    
-    // 3. Fill Color
-    tokens.push({ label: getFillToken(btnProps.variant), x: width + 60, y: height + 60, targetX: width - 20, targetY: height - 10, delay: 0.3 });
-    
-    // 4. Content Color (Restored)
-    tokens.push({ label: getTextToken(btnProps.variant), x: width + 60, y: height / 2, targetX: width - 12, targetY: height / 2, delay: 0.4 });
-
-    // 5. Icon
-    if (children.icon) {
-        tokens.push({ label: 'Icon', x: -40, y: height + 40, targetX: children.icon.x + children.icon.width / 2, targetY: children.icon.y + children.icon.height, delay: 0.5 });
+    if (btnProps.componentType === 'button') {
+      tokenData.push({ label: 'Radius.Full', x: -40, y: -40, targetX: 8, targetY: 8, delay: 0.1 });
+      tokenData.push({ label: getPaddingToken(btnProps.size), x: -60, y: height / 2, targetX: padding.left / 2, targetY: height / 2, delay: 0.2 });
+      tokenData.push({ label: getFillToken(btnProps.variant), x: width + 60, y: height + 60, targetX: width - 20, targetY: height - 10, delay: 0.3 });
+      tokenData.push({ label: getTextToken(btnProps.variant), x: width + 60, y: height / 2, targetX: width - 12, targetY: height / 2, delay: 0.4 });
+      if (children.icon) {
+          tokenData.push({ label: 'Icon', x: -40, y: height + 40, targetX: children.icon.x + children.icon.width / 2, targetY: children.icon.y + children.icon.height, delay: 0.5 });
+      }
+      if (children.icon && children.text && gap > 0) {
+          const gapX = children.icon.x + children.icon.width + gap / 2;
+          tokenData.push({ label: 'Space.S', x: gapX, y: height + 60, targetX: gapX, targetY: height - 12, delay: 0.6 });
+      }
+      if (children.text) {
+          const textCenter = children.text.x + children.text.width / 2;
+          tokenData.push({ label: `Type.${getTypographyToken(btnProps.size)}`, x: textCenter, y: -50, targetX: textCenter, targetY: children.text.y + 4, delay: 0.7 });
+      }
+    } else {
+      tokenData.push({ label: 'Radius.L', x: -40, y: -40, targetX: 12, targetY: 12, delay: 0.1 });
+      tokenData.push({ label: 'Space.XL', x: -60, y: 100, targetX: padding.left / 2, targetY: 100, delay: 0.2 });
+      tokenData.push({ label: 'Base.Surface.1', x: width + 60, y: height + 60, targetX: width - 20, targetY: height - 10, delay: 0.3 });
+      if (children.title) {
+          const titleY = children.title.y + children.title.height / 2;
+          tokenData.push({ label: getTextToken(btnProps.variant), x: width + 60, y: titleY, targetX: width - 20, targetY: titleY, delay: 0.4 });
+      }
+      if (children.media) {
+          tokenData.push({ label: 'Base.Surface.2', x: -40, y: 200, targetX: children.media.x + 20, targetY: children.media.y + 20, delay: 0.5 });
+      }
+      if (children.title) {
+          const textCenter = children.title.x + children.title.width / 2;
+          tokenData.push({ label: 'Type.Headline.S', x: textCenter, y: -50, targetX: textCenter, targetY: children.title.y + 10, delay: 0.6 });
+      }
     }
 
-    // 6. Gap
-    if (children.icon && children.text && gap > 0) {
-        const gapX = children.icon.x + children.icon.width + gap / 2;
-        tokens.push({ label: 'Space.S', x: gapX, y: height + 60, targetX: gapX, targetY: height - 12, delay: 0.6 });
-    }
-
-    // 7. Typography
-    if (children.text) {
-        const textCenter = children.text.x + children.text.width / 2;
-        tokens.push({ label: `Type.${getTypographyToken(btnProps.size)}`, x: textCenter, y: -50, targetX: textCenter, targetY: children.text.y + 4, delay: 0.7 });
-    }
-  } else {
-    // Card Tokens
-    tokens.push({ label: 'Radius.L', x: -40, y: -40, targetX: 12, targetY: 12, delay: 0.1 });
-    tokens.push({ label: 'Space.XL', x: -60, y: 100, targetX: padding.left / 2, targetY: 100, delay: 0.2 });
-    
-    // Fill
-    tokens.push({ label: 'Base.Surface.1', x: width + 60, y: height + 60, targetX: width - 20, targetY: height - 10, delay: 0.3 });
-    
-    // Content Color (Restored for Title)
-    if (children.title) {
-        const titleY = children.title.y + children.title.height / 2;
-        tokens.push({ label: getTextToken(btnProps.variant), x: width + 60, y: titleY, targetX: width - 20, targetY: titleY, delay: 0.4 });
-    }
-
-    if (children.media) {
-        tokens.push({ label: 'Base.Surface.2', x: -40, y: 200, targetX: children.media.x + 20, targetY: children.media.y + 20, delay: 0.5 });
-    }
-
-    if (children.title) {
-        const textCenter = children.title.x + children.title.width / 2;
-        tokens.push({ label: 'Type.Headline.S', x: textCenter, y: -50, targetX: textCenter, targetY: children.title.y + 10, delay: 0.6 });
-    }
-  }
+    return tokenData.map(t => {
+      const width = t.label.length * 7 + 16; // Estimate width based on label
+      return {
+        ...t,
+        variant: getTokenVariant(t.label),
+        x: motionValue(t.x),
+        y: motionValue(t.y),
+        width,
+      };
+    });
+  }, [anatomy, btnProps]);
 
   return (
-    <div style={{ position: 'absolute', top: -PAD, left: -PAD, width: width + PAD * 2, height: height + PAD * 2, pointerEvents: 'none', zIndex: 11, transform: 'translateZ(10px)' }}>
-      <svg width="100%" height="100%" style={{ overflow: 'visible' }}>
+    <div style={{ position: 'absolute', top: -PAD, left: -PAD, width: width + PAD * 2, height: height + PAD * 2, zIndex: 11, transform: 'translateZ(10px)' }}>
+      <svg width="100%" height="100%" style={{ overflow: 'visible', position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }}>
         <g transform={`translate(${PAD}, ${PAD})`}>
-          {tokens.map((t, i) => <TokenBadge key={i} {...t} variant={getTokenVariant(t.label)} />)}
+          {tokens.map((t, i) => <TokenConnector key={i} {...t} />)}
         </g>
       </svg>
+      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+        <div style={{ position: 'absolute', top: PAD, left: PAD }}>
+            {tokens.map((t, i) => <TokenBadge key={i} {...t} />)}
+        </div>
+      </div>
     </div>
   );
 };

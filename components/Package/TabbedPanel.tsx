@@ -18,7 +18,7 @@ const TabbedPanel: React.FC<TabbedPanelProps> = ({ panels }) => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ padding: theme.spacing['Space.M'], borderBottom: `1px solid ${theme.Color.Base.Surface[3]}` }}>
+      <div style={{ padding: theme.spacing['Space.M'] }}>
         <SegmentedTab 
           tabs={panels}
           activeTab={activeTab}

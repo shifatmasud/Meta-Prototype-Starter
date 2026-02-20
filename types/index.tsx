@@ -6,7 +6,7 @@
 import { ButtonVariant, ButtonSize } from '../components/Core/Button.tsx';
 
 // --- Window Management ---
-export type WindowId = 'control' | 'code' | 'console';
+export type WindowId = 'control' | 'code' | 'console' | 'styles';
 
 export interface WindowState {
   id: WindowId;

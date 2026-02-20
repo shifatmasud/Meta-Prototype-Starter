@@ -22,7 +22,7 @@ const ICON_MAP: Record<string, { icon: string; label: string }> = {
 
 const Dock: React.FC<DockProps> = ({ windows, toggleWindow }) => {
     const { theme } = useTheme();
-    const windowItems = Object.keys(windows) as WindowId[];
+    const windowItems = (Object.keys(windows) as WindowId[]).filter(id => id !== 'styles');
 
     return (
       <motion.div

@@ -12,6 +12,7 @@ import Stage from '../Section/Stage.tsx';
 import ControlPanel from '../Package/ControlPanel.tsx';
 import CodePanel from '../Package/CodePanel.tsx';
 import ConsolePanel from '../Package/ConsolePanel.tsx';
+import StyleGuidePanel from '../Package/StyleGuidePanel.tsx';
 import TabbedPanel from '../Package/TabbedPanel.tsx';
 import UndoRedo from '../Package/UndoRedo.tsx';
 import Confetti from '../Core/Confetti.tsx';
@@ -98,6 +99,7 @@ const MetaPrototype = () => {
     control: { id: 'control', title: 'Control', isOpen: false, zIndex: 1, x: -WINDOW_WIDTH / 2, y: -CONTROL_PANEL_HEIGHT / 2, height: CONTROL_PANEL_HEIGHT },
     code: { id: 'code', title: 'Code I/O', isOpen: false, zIndex: 2, x: -WINDOW_WIDTH / 2, y: -CODE_PANEL_HEIGHT / 2, height: CODE_PANEL_HEIGHT },
     console: { id: 'console', title: 'Console', isOpen: false, zIndex: 3, x: -WINDOW_WIDTH / 2, y: -CONSOLE_PANEL_HEIGHT / 2, height: CONSOLE_PANEL_HEIGHT },
+    styles: { id: 'styles', title: 'Style Guide', isOpen: false, zIndex: 4, x: -WINDOW_WIDTH / 2, y: -CONTROL_PANEL_HEIGHT / 2, height: CONTROL_PANEL_HEIGHT },
   });
 
   // -- Code Editor State --
@@ -266,6 +268,8 @@ const MetaPrototype = () => {
                 onToggleMeasurements={handleToggleMeasurements}
                 showTokens={showTokens}
                 onToggleTokens={handleToggleTokens}
+                showStyles={windows.styles.isOpen}
+                onToggleStyles={() => toggleWindow('styles')}
                 // 3D Props
                 view3D={view3D}
                 onToggleView3D={() => setView3D(!view3D)}
@@ -310,6 +314,18 @@ const MetaPrototype = () => {
             <ConsolePanel logs={logs} />
           </FloatingWindow>
         )}
+
+        {windows.styles.isOpen && (
+          <FloatingWindow
+            key="styles"
+            {...windows.styles}
+            onClose={() => toggleWindow('styles')}
+            onResize={(newHeight) => handleResize('styles', newHeight)}
+            onFocus={() => bringToFront('styles')}
+          >
+            <StyleGuidePanel />
+          </FloatingWindow>
+        )}
       </AnimatePresence>
 
             {uiMode === 'default' ? (
@@ -330,7 +346,10 @@ const MetaPrototype = () => {
         >
           <TabbedPanel 
             panels={[
-              { id: 'control', title: 'Control', icon: <Sliders size={16} />, content: <ControlPanel btnProps={btnProps} onPropChange={handlePropChange} radiusMotionValue={radiusMotionValue} onRadiusCommit={handleRadiusCommit} showMeasurements={showMeasurements} onToggleMeasurements={handleToggleMeasurements} showTokens={showTokens} onToggleTokens={handleToggleTokens} view3D={view3D} onToggleView3D={() => setView3D(!view3D)} layerSpacing={layerSpacing} viewRotateX={viewRotateX} viewRotateZ={viewRotateZ} uiMode={uiMode} onToggleUIMode={() => setUiMode(uiMode === 'default' ? 'lean' : 'default')}
+              { id: 'control', title: 'Control', icon: <Sliders size={16} />, content: <ControlPanel btnProps={btnProps} onPropChange={handlePropChange} radiusMotionValue={radiusMotionValue} onRadiusCommit={handleRadiusCommit} showMeasurements={showMeasurements} onToggleMeasurements={handleToggleMeasurements} showTokens={showTokens} onToggleTokens={handleToggleTokens} 
+                showStyles={windows.styles.isOpen}
+                onToggleStyles={() => toggleWindow('styles')}
+                view3D={view3D} onToggleView3D={() => setView3D(!view3D)} layerSpacing={layerSpacing} viewRotateX={viewRotateX} viewRotateZ={viewRotateZ} uiMode={uiMode} onToggleUIMode={() => setUiMode(uiMode === 'default' ? 'lean' : 'default')}
                 showThemeToggle={showThemeToggle}
                 onToggleThemeButton={() => setShowThemeToggle(!showThemeToggle)} /> },
               { id: 'code', title: 'Code I/O', icon: <Code size={16} />, content: <CodePanel codeText={codeText} onCodeChange={handleCodeChange} onCopyCode={handleCopyCode} onFocus={() => setIsCodeFocused(true)} onBlur={() => setIsCodeFocused(false)} btnProps={btnProps} /> },

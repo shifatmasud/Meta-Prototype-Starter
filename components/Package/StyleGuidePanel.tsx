@@ -50,15 +50,16 @@ const StyleGuidePanel: React.FC = () => {
     const ms = parseInt(duration) || 0;
     return (
       <div style={{ 
-        width: 80, 
-        height: 8, 
+        width: 100, 
+        height: 4, 
         backgroundColor: theme.Color.Base.Surface[3], 
-        borderRadius: 4, 
+        borderRadius: theme.radius['Radius.Full'], 
         overflow: 'hidden',
-        position: 'relative'
+        position: 'relative',
       }}>
         <motion.div
-          animate={{ x: ['-100%', '100%'] }}
+          initial={{ left: "-8px" }}
+          animate={{ left: "100%" }}
           transition={{ 
             duration: ms / 1000, 
             ease: "linear", 
@@ -67,10 +68,10 @@ const StyleGuidePanel: React.FC = () => {
           style={{
             position: 'absolute',
             top: 0,
-            left: 0,
-            width: '100%',
+            width: '8px',
             height: '100%',
-            backgroundColor: theme.Color.Accent.Surface[1],
+            background: `linear-gradient(90deg, transparent, ${theme.Color.Accent.Surface[1]}, transparent)`,
+            boxShadow: `0 0 12px ${theme.Color.Accent.Surface[1]}`,
           }}
         />
       </div>
@@ -144,7 +145,7 @@ const StyleGuidePanel: React.FC = () => {
         </div>
       </Section>
 
-      <Section title="Spacing">
+      <Section title="Space">
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: theme.spacing['Space.S'] }}>
           {Object.entries(theme.spacing).map(([name, value]) => (
             <TokenRow 
@@ -170,8 +171,8 @@ const StyleGuidePanel: React.FC = () => {
         </div>
       </Section>
 
-      <Section title="Motion (Time)">
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: theme.spacing['Space.S'] }}>
+      <Section title="Time">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: theme.spacing['Space.S'] }}>
           {Object.entries(theme.time).map(([name, value]) => (
             <TokenRow 
               key={name}

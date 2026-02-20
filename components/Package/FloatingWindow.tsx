@@ -52,7 +52,7 @@ const FloatingWindow: React.FC<FloatingWindowProps> = ({
     backdropFilter: 'blur(20px)',
     borderRadius: theme.radius['Radius.L'],
     boxShadow: theme.effects['Effect.Shadow.Drop.3'],
-    border: `1px solid ${theme.Color.Base.Surface[3]}`,
+    border: 'none',
     zIndex: zIndex,
     display: 'flex',
     flexDirection: 'column',

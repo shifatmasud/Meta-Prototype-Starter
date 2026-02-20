@@ -92,6 +92,11 @@ Imagine you're building with LEGOs. This project gives you a super organized box
 ├── metadata.json
 ```
 
+## Recent Updates
+
+- **System Spec Window**: Added a dedicated floating window that outlines the project's core rules, engineering standards, and design system. Accessible via the "System Spec" toggle in the Inspector group.
+- **Interactive Visuals**: The System Spec window features custom SVG animations and a "Copy as Markdown" utility.
+
 ## How to Get Started
 
 1.  Open the `index.html` file in a modern web browser.

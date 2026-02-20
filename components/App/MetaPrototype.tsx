@@ -14,6 +14,7 @@ import CodePanel from '../Package/CodePanel.tsx';
 import ConsolePanel from '../Package/ConsolePanel.tsx';
 import StyleGuidePanel from '../Package/StyleGuidePanel.tsx';
 import TabbedPanel from '../Package/TabbedPanel.tsx';
+import SystemSpec from '../Package/SystemSpec.tsx';
 import UndoRedo from '../Package/UndoRedo.tsx';
 import Confetti from '../Core/Confetti.tsx';
 import { Sliders, Code, Terminal } from 'phosphor-react';
@@ -100,6 +101,7 @@ const MetaPrototype = () => {
     code: { id: 'code', title: 'Code I/O', isOpen: false, zIndex: 2, x: -WINDOW_WIDTH / 2, y: -CODE_PANEL_HEIGHT / 2, height: CODE_PANEL_HEIGHT },
     console: { id: 'console', title: 'Console', isOpen: false, zIndex: 3, x: -WINDOW_WIDTH / 2, y: -CONSOLE_PANEL_HEIGHT / 2, height: CONSOLE_PANEL_HEIGHT },
     styles: { id: 'styles', title: 'Style Guide', isOpen: false, zIndex: 4, x: -WINDOW_WIDTH / 2, y: -CONTROL_PANEL_HEIGHT / 2, height: CONTROL_PANEL_HEIGHT },
+    systemSpec: { id: 'systemSpec', title: 'System Spec', isOpen: false, zIndex: 5, x: -WINDOW_WIDTH / 2, y: -CONTROL_PANEL_HEIGHT / 2, height: CONTROL_PANEL_HEIGHT },
   });
 
   // -- Code Editor State --
@@ -270,6 +272,8 @@ const MetaPrototype = () => {
                 onToggleTokens={handleToggleTokens}
                 showStyles={windows.styles.isOpen}
                 onToggleStyles={() => toggleWindow('styles')}
+                showSystemSpec={windows.systemSpec.isOpen}
+                onToggleSystemSpec={() => toggleWindow('systemSpec')}
                 // 3D Props
                 view3D={view3D}
                 onToggleView3D={() => setView3D(!view3D)}
@@ -326,6 +330,18 @@ const MetaPrototype = () => {
             <StyleGuidePanel />
           </FloatingWindow>
         )}
+
+        {windows.systemSpec.isOpen && (
+          <FloatingWindow
+            key="systemSpec"
+            {...windows.systemSpec}
+            onClose={() => toggleWindow('systemSpec')}
+            onResize={(newHeight) => handleResize('systemSpec', newHeight)}
+            onFocus={() => bringToFront('systemSpec')}
+          >
+            <SystemSpec />
+          </FloatingWindow>
+        )}
       </AnimatePresence>
 
             {uiMode === 'default' ? (
@@ -349,6 +365,8 @@ const MetaPrototype = () => {
               { id: 'control', title: 'Control', icon: <Sliders size={16} />, content: <ControlPanel btnProps={btnProps} onPropChange={handlePropChange} radiusMotionValue={radiusMotionValue} onRadiusCommit={handleRadiusCommit} showMeasurements={showMeasurements} onToggleMeasurements={handleToggleMeasurements} showTokens={showTokens} onToggleTokens={handleToggleTokens} 
                 showStyles={windows.styles.isOpen}
                 onToggleStyles={() => toggleWindow('styles')}
+                showSystemSpec={windows.systemSpec.isOpen}
+                onToggleSystemSpec={() => toggleWindow('systemSpec')}
                 view3D={view3D} onToggleView3D={() => setView3D(!view3D)} layerSpacing={layerSpacing} viewRotateX={viewRotateX} viewRotateZ={viewRotateZ} uiMode={uiMode} onToggleUIMode={() => setUiMode(uiMode === 'default' ? 'lean' : 'default')}
                 showThemeToggle={showThemeToggle}
                 onToggleThemeButton={() => setShowThemeToggle(!showThemeToggle)} /> },

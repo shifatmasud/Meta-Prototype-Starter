@@ -17,6 +17,7 @@ const ICON_MAP: Record<string, { icon: string; label: string }> = {
   control: { icon: 'ph-sliders', label: 'Control' },
   code: { icon: 'ph-code', label: 'Code' },
   console: { icon: 'ph-terminal-window', label: 'Console' },
+  systemSpec: { icon: 'ph-shield-check', label: 'Spec' },
   settings: { icon: 'ph-gear', label: 'Settings' },
 };
 

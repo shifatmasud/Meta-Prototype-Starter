@@ -24,6 +24,8 @@ interface ControlPanelProps {
   onToggleTokens: () => void;
   showStyles: boolean;
   onToggleStyles: () => void;
+  showSystemSpec: boolean;
+  onToggleSystemSpec: () => void;
   // 3D View Props
   view3D: boolean;
   onToggleView3D: () => void;
@@ -47,6 +49,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   onToggleTokens,
   showStyles,
   onToggleStyles,
+  showSystemSpec,
+  onToggleSystemSpec,
   view3D,
   onToggleView3D,
   layerSpacing,
@@ -238,6 +242,11 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             label="Show Styles"
             isOn={showStyles}
             onToggle={onToggleStyles}
+          />
+          <Toggle
+            label="System Spec"
+            isOn={showSystemSpec}
+            onToggle={onToggleSystemSpec}
           />
           <Toggle
             label="3D Layer View"

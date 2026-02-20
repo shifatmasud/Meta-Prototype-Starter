@@ -324,11 +324,31 @@ Never overwrite previous entries.`;
             <div style={{ ...itemStyle, fontWeight: 600, marginBottom: '8px', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
               <TextT size={16} /> Typography
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              <span style={{ fontFamily: 'Bebas Neue', fontSize: '18px', color: theme.Color.Base.Content[1] }}>Bebas Neue (Hero)</span>
-              <span style={{ fontFamily: 'Inter', fontSize: '14px', color: theme.Color.Base.Content[1] }}>Inter (Body)</span>
-              <span style={{ fontFamily: 'Victor Mono', fontSize: '14px', color: theme.Color.Base.Content[1] }}>Victor Mono (Data)</span>
-              <span style={{ fontFamily: 'Comic Neue', fontSize: '14px', color: theme.Color.Base.Content[1], fontStyle: 'italic' }}>Comic Neue (Quotes)</span>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(2, 1fr)', 
+              gap: theme.spacing['Space.S'],
+              marginTop: '4px' 
+            }}>
+              {[
+                { role: 'Hero', font: 'Bebas Neue', style: { fontFamily: 'Bebas Neue', fontSize: '20px' } },
+                { role: 'Body', font: 'Inter', style: { fontFamily: 'Inter', fontSize: '14px' } },
+                { role: 'Data', font: 'Victor Mono', style: { fontFamily: 'Victor Mono', fontSize: '12px' } },
+                { role: 'Quotes', font: 'Comic Neue', style: { fontFamily: 'Comic Neue', fontSize: '14px', fontStyle: 'italic' } },
+              ].map((item, i) => (
+                <div key={i} style={{ 
+                  backgroundColor: theme.Color.Base.Surface[2],
+                  padding: theme.spacing['Space.M'],
+                  borderRadius: '12px',
+                  border: `1px solid ${theme.Color.Base.Surface[3]}`,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '4px'
+                }}>
+                  <div style={{ ...itemStyle, fontSize: '10px', opacity: 0.5, textTransform: 'uppercase' }}>{item.role}</div>
+                  <div style={{ ...itemStyle, ...item.style, color: theme.Color.Base.Content[1] }}>{item.font}</div>
+                </div>
+              ))}
             </div>
           </div>
 

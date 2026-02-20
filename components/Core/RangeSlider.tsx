@@ -38,6 +38,7 @@ const RangeSlider: React.FC<RangeSliderProps> = ({
   
   const [isDragging, setIsDragging] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [inputValue, setInputValue] = useState<string | number>('');
 
   // Sync internal state with external motion value updates (e.g. undo/redo)
   useEffect(() => {
@@ -82,15 +83,22 @@ const RangeSlider: React.FC<RangeSliderProps> = ({
 
   const handleCommit = () => {
     setIsEditing(false);
-    onCommit(internalValue);
+    const v = parseInt(String(inputValue), 10);
+    const clamped = isNaN(v) ? min : Math.min(Math.max(v, min), max);
+    setInternalValue(clamped);
+    motionValue.set(clamped);
+    onCommit(clamped);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const v = parseInt(e.target.value, 10) || min;
-    const clamped = Math.min(Math.max(v, min), max);
-    setInternalValue(clamped);
-    motionValue.set(clamped);
-    if (onChange) onChange(clamped);
+    setInputValue(e.target.value);
+    const v = parseInt(e.target.value, 10);
+    
+    if (!isNaN(v)) {
+        const clamped = Math.min(Math.max(v, min), max);
+        motionValue.set(clamped);
+        if (onChange) onChange(clamped);
+    }
   };
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -207,7 +215,7 @@ const RangeSlider: React.FC<RangeSliderProps> = ({
               type="number"
               min={min}
               max={max}
-              value={Math.round(internalValue)}
+              value={inputValue}
               onChange={handleInputChange}
               onBlur={handleCommit}
               onKeyDown={handleInputKeyDown}
@@ -217,7 +225,10 @@ const RangeSlider: React.FC<RangeSliderProps> = ({
           ) : (
             <div
               style={animatedCounterWrapperStyle}
-              onClick={() => setIsEditing(true)}
+              onPointerDown={() => {
+                setInputValue(Math.round(internalValue));
+                setIsEditing(true)
+              }}
             >
               <AnimatedCounter value={Math.round(internalValue)} useFormatting={false} />
             </div>

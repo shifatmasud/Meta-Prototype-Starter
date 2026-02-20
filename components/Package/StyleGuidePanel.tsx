@@ -50,7 +50,7 @@ const StyleGuidePanel: React.FC = () => {
     const ms = parseInt(duration) || 0;
     return (
       <div style={{ 
-        width: 100, 
+        width: 150, 
         height: 4, 
         backgroundColor: theme.Color.Base.Surface[3], 
         borderRadius: theme.radius['Radius.Full'], 

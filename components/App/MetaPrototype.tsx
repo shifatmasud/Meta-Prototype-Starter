@@ -12,6 +12,7 @@ import Stage from '../Section/Stage.tsx';
 import ControlPanel from '../Package/ControlPanel.tsx';
 import CodePanel from '../Package/CodePanel.tsx';
 import ConsolePanel from '../Package/ConsolePanel.tsx';
+import TabbedPanel from '../Package/TabbedPanel.tsx';
 import UndoRedo from '../Package/UndoRedo.tsx';
 import Confetti from '../Core/Confetti.tsx';
 import { WindowId, WindowState, LogEntry, MetaButtonProps } from '../../types/index.tsx';
@@ -22,6 +23,8 @@ import { WindowId, WindowState, LogEntry, MetaButtonProps } from '../../types/in
  */
 const MetaPrototype = () => {
   const { theme } = useTheme();
+    const [uiMode, setUiMode] = useState<'default' | 'lean'>('lean');
+  const [showThemeToggle, setShowThemeToggle] = useState(false);
   
   // -- App State --
   const [btnProps, setBtnProps] = useState<MetaButtonProps>({
@@ -83,10 +86,17 @@ const MetaPrototype = () => {
   const CODE_PANEL_HEIGHT = 408;
   const CONSOLE_PANEL_HEIGHT = 200; // Increased slightly for better visibility
 
+  const handleResize = (id: WindowId, newHeight: number) => {
+    setWindows(prev => ({
+      ...prev,
+      [id]: { ...prev[id], height: newHeight },
+    }));
+  };
+
   const [windows, setWindows] = useState<Record<WindowId, WindowState>>({
-    control: { id: 'control', title: 'Control', isOpen: false, zIndex: 1, x: -WINDOW_WIDTH / 2, y: -CONTROL_PANEL_HEIGHT / 2 },
-    code: { id: 'code', title: 'Code I/O', isOpen: false, zIndex: 2, x: -WINDOW_WIDTH / 2, y: -CODE_PANEL_HEIGHT / 2 },
-    console: { id: 'console', title: 'Console', isOpen: false, zIndex: 3, x: -WINDOW_WIDTH / 2, y: -CONSOLE_PANEL_HEIGHT / 2 },
+    control: { id: 'control', title: 'Control', isOpen: false, zIndex: 1, x: -WINDOW_WIDTH / 2, y: -CONTROL_PANEL_HEIGHT / 2, height: CONTROL_PANEL_HEIGHT },
+    code: { id: 'code', title: 'Code I/O', isOpen: false, zIndex: 2, x: -WINDOW_WIDTH / 2, y: -CODE_PANEL_HEIGHT / 2, height: CODE_PANEL_HEIGHT },
+    console: { id: 'console', title: 'Console', isOpen: false, zIndex: 3, x: -WINDOW_WIDTH / 2, y: -CONSOLE_PANEL_HEIGHT / 2, height: CONSOLE_PANEL_HEIGHT },
   });
 
   // -- Code Editor State --
@@ -219,7 +229,9 @@ const MetaPrototype = () => {
       alignItems: 'center',
       justifyContent: 'center',
     }}>
-      <ThemeToggleButton />
+            <div style={{ position: 'fixed', top: '20px', right: '20px', zIndex: 1001, display: 'flex', gap: '10px' }}>
+                {showThemeToggle && <ThemeToggleButton />}
+      </div>
       <Confetti trigger={confettiTrigger} />
 
       <Stage
@@ -235,11 +247,12 @@ const MetaPrototype = () => {
 
       {/* --- WINDOWS --- */}
       <AnimatePresence>
-        {windows.control.isOpen && (
+        {uiMode === 'default' && windows.control.isOpen && (
           <FloatingWindow
             key="control"
             {...windows.control}
             onClose={() => toggleWindow('control')}
+            onResize={(newHeight) => handleResize('control', newHeight)}
             onFocus={() => bringToFront('control')}
             footer={<UndoRedo onUndo={handleUndo} onRedo={handleRedo} canUndo={history.length > 0} canRedo={future.length > 0} />}
           >
@@ -258,15 +271,20 @@ const MetaPrototype = () => {
                 layerSpacing={layerSpacing}
                 viewRotateX={viewRotateX}
                 viewRotateZ={viewRotateZ}
+                uiMode={uiMode}
+                onToggleUIMode={() => setUiMode(uiMode === 'default' ? 'lean' : 'default')}
+                showThemeToggle={showThemeToggle}
+                onToggleThemeButton={() => setShowThemeToggle(!showThemeToggle)}
             />
           </FloatingWindow>
         )}
 
-        {windows.code.isOpen && (
+        {uiMode === 'default' && windows.code.isOpen && (
           <FloatingWindow
             key="code"
             {...windows.code}
             onClose={() => toggleWindow('code')}
+            onResize={(newHeight) => handleResize('code', newHeight)}
             onFocus={() => bringToFront('code')}
           >
             <CodePanel
@@ -280,11 +298,12 @@ const MetaPrototype = () => {
           </FloatingWindow>
         )}
 
-        {windows.console.isOpen && (
+        {uiMode === 'default' && windows.console.isOpen && (
           <FloatingWindow
             key="console"
             {...windows.console}
             onClose={() => toggleWindow('console')}
+            onResize={(newHeight) => handleResize('console', newHeight)}
             onFocus={() => bringToFront('console')}
           >
             <ConsolePanel logs={logs} />
@@ -292,7 +311,34 @@ const MetaPrototype = () => {
         )}
       </AnimatePresence>
 
-      <Dock windows={windows} toggleWindow={toggleWindow} />
+            {uiMode === 'default' ? (
+        <Dock windows={windows} toggleWindow={toggleWindow} />
+      ) : (
+        <Dock windows={{ settings: { id: 'settings', title: 'Settings', isOpen: windows.control.isOpen, zIndex: 1, x: 0, y: 0, height: 600 } }} toggleWindow={() => toggleWindow('control')} />
+      )}
+
+      {/* --- LEAN MODE WINDOW --- */}
+      {uiMode === 'lean' && windows.control.isOpen && (
+        <FloatingWindow
+          key="lean-window"
+          {...windows.control}
+          onClose={() => toggleWindow('control')}
+          onFocus={() => bringToFront('control')}
+          onResize={(newHeight) => handleResize('control', newHeight)}
+          footer={<UndoRedo onUndo={handleUndo} onRedo={handleRedo} canUndo={history.length > 0} canRedo={future.length > 0} />}
+        >
+          <TabbedPanel 
+            panels={[
+              { id: 'control', title: 'Control', content: <ControlPanel btnProps={btnProps} onPropChange={handlePropChange} radiusMotionValue={radiusMotionValue} onRadiusCommit={handleRadiusCommit} showMeasurements={showMeasurements} onToggleMeasurements={handleToggleMeasurements} showTokens={showTokens} onToggleTokens={handleToggleTokens} view3D={view3D} onToggleView3D={() => setView3D(!view3D)} layerSpacing={layerSpacing} viewRotateX={viewRotateX} viewRotateZ={viewRotateZ} uiMode={uiMode} onToggleUIMode={() => setUiMode(uiMode === 'default' ? 'lean' : 'default')}
+                showThemeToggle={showThemeToggle}
+                onToggleThemeButton={() => setShowThemeToggle(!showThemeToggle)} /> },
+              { id: 'code', title: 'Code I/O', content: <CodePanel codeText={codeText} onCodeChange={handleCodeChange} onCopyCode={handleCopyCode} onFocus={() => setIsCodeFocused(true)} onBlur={() => setIsCodeFocused(false)} btnProps={btnProps} /> },
+              { id: 'console', title: 'Console', content: <ConsolePanel logs={logs} /> },
+            ]}
+          />
+        </FloatingWindow>
+      )}
+
     </div>
   );
 };

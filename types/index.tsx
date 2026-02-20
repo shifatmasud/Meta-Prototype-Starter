@@ -15,6 +15,7 @@ export interface WindowState {
   zIndex: number;
   x: number;
   y: number;
+  height: number;
 }
 
 // --- Console Logging ---

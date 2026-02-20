@@ -13,14 +13,16 @@ interface DockProps {
     toggleWindow: (id: WindowId) => void;
 }
 
-const DOCK_ITEMS = [
-  { id: 'control' as WindowId, icon: 'ph-sliders', label: 'Control' },
-  { id: 'code' as WindowId, icon: 'ph-code', label: 'Code' },
-  { id: 'console' as WindowId, icon: 'ph-terminal-window', label: 'Console' },
-];
+const ICON_MAP: Record<string, { icon: string; label: string }> = {
+  control: { icon: 'ph-sliders', label: 'Control' },
+  code: { icon: 'ph-code', label: 'Code' },
+  console: { icon: 'ph-terminal-window', label: 'Console' },
+  settings: { icon: 'ph-gear', label: 'Settings' },
+};
 
 const Dock: React.FC<DockProps> = ({ windows, toggleWindow }) => {
     const { theme } = useTheme();
+    const windowItems = Object.keys(windows) as WindowId[];
 
     return (
       <motion.div
@@ -42,12 +44,12 @@ const Dock: React.FC<DockProps> = ({ windows, toggleWindow }) => {
           zIndex: 1000,
         }}
       >
-        {DOCK_ITEMS.map((item) => (
+        {windowItems.map((id) => (
           <DockIcon
-            key={item.id}
-            icon={item.icon}
-            isActive={windows[item.id].isOpen}
-            onClick={() => toggleWindow(item.id)}
+            key={id}
+            icon={ICON_MAP[id]?.icon || 'ph-question'}
+            isActive={windows[id].isOpen}
+            onClick={() => toggleWindow(id)}
           />
         ))}
       </motion.div>

@@ -2,9 +2,11 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../Theme.tsx';
+import useOutsideClick from '../../hooks/useOutsideClick.ts';
 
 interface SelectProps {
   label: string;
@@ -17,9 +19,32 @@ interface SelectProps {
 const Select: React.FC<SelectProps> = ({ label, value, onChange, options, style }) => {
   const { theme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
 
   // Find label for current value
   const currentLabel = options.find(opt => opt.value === value)?.label || value;
+
+  const handleClose = useCallback((event: MouseEvent | TouchEvent) => {
+    if (triggerRef.current && triggerRef.current.contains(event.target as Node)) {
+      return;
+    }
+    setIsOpen(false);
+  }, []);
+
+  useOutsideClick(dropdownRef, handleClose);
+
+  useEffect(() => {
+    if (isOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setPosition({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      });
+    }
+  }, [isOpen]);
 
   const handleSelect = (newValue: string) => {
     // Simulate a change event
@@ -67,6 +92,7 @@ const Select: React.FC<SelectProps> = ({ label, value, onChange, options, style 
       
       {/* Trigger Button */}
       <motion.button
+        ref={triggerRef}
         style={triggerStyle}
         onClick={() => setIsOpen(!isOpen)}
         whileTap={{ scale: 0.98 }}
@@ -79,19 +105,12 @@ const Select: React.FC<SelectProps> = ({ label, value, onChange, options, style 
         />
       </motion.button>
 
-      {/* Backdrop for click outside */}
-      {isOpen && (
-        <div 
-            style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 99, cursor: 'default' }} 
-            onClick={() => setIsOpen(false)} 
-        />
-      )}
-
-      {/* Dropdown Menu */}
-      <AnimatePresence>
-        {isOpen && (
+      {/* Dropdown Menu Portal */}
+      {isOpen && ReactDOM.createPortal(
+        <AnimatePresence>
           <motion.div
-            style={dropdownStyle}
+            ref={dropdownRef}
+            style={{...dropdownStyle, top: position.top, left: position.left, width: position.width}}
             initial={{ opacity: 0, y: -10, scaleY: 0.9 }}
             animate={{ opacity: 1, y: 0, scaleY: 1 }}
             exit={{ opacity: 0, y: -10, scaleY: 0.9 }}
@@ -123,8 +142,9 @@ const Select: React.FC<SelectProps> = ({ label, value, onChange, options, style 
               </motion.div>
             ))}
           </motion.div>
-        )}
-      </AnimatePresence>
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 };

@@ -11,6 +11,7 @@ import Select from '../Core/Select.tsx';
 import RangeSlider from '../Core/RangeSlider.tsx';
 import ColorPicker from '../Core/ColorPicker.tsx';
 import Toggle from '../Core/Toggle.tsx';
+import Accordion from '../Core/Accordion.tsx';
 
 interface ControlPanelProps {
   btnProps: MetaButtonProps;
@@ -27,6 +28,10 @@ interface ControlPanelProps {
   layerSpacing: MotionValue<number>;
   viewRotateX: MotionValue<number>;
   viewRotateZ: MotionValue<number>;
+  uiMode: 'default' | 'lean';
+    onToggleUIMode: () => void;
+  showThemeToggle: boolean;
+  onToggleThemeButton: () => void;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({ 
@@ -42,9 +47,13 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   onToggleView3D,
   layerSpacing,
   viewRotateX,
-  viewRotateZ
+  viewRotateZ,
+  uiMode,
+    onToggleUIMode,
+  showThemeToggle,
+  onToggleThemeButton
 }) => {
-  const { theme, themeName } = useTheme();
+  const { theme, themeName, setThemeName } = useTheme();
 
   // Helper to determine current interaction state
   const currentInteraction = btnProps.disabled ? 'disabled' 
@@ -75,77 +84,98 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 
   return (
     <>
-      <Select
-        label="Component Type"
-        value={btnProps.componentType}
-        onChange={(e) => onPropChange({ 
-            componentType: e.target.value,
-            customRadius: e.target.value === 'card' ? '40px' : '56px',
-            variant: e.target.value === 'card' ? 'secondary' : 'primary'
-        })}
-        options={[
-          { value: 'button', label: 'Button (Core)' },
-          { value: 'card', label: 'Card (Package)' },
-        ]}
-      />
+      <Accordion title="Global" defaultOpen>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing['Space.M'] }}>
+          <Toggle
+            label="Lean UI Mode"
+            isOn={uiMode === 'lean'}
+            onToggle={onToggleUIMode}
+          />
+          <Toggle
+            label="Dark Mode"
+            isOn={themeName === 'dark'}
+            onToggle={() => setThemeName(themeName === 'dark' ? 'light' : 'dark')}
+          />
+          <Toggle
+            label="Show Theme Toggle"
+            isOn={showThemeToggle}
+            onToggle={onToggleThemeButton}
+          />
+        </div>
+      </Accordion>
 
-      <div style={{ marginTop: theme.spacing['Space.L'] }}>
+      <Accordion title="Component">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing['Space.L'] }}>
+          <Select
+            label="Component Type"
+            value={btnProps.componentType}
+            onChange={(e) => onPropChange({ 
+                componentType: e.target.value,
+                customRadius: e.target.value === 'card' ? '40px' : '56px',
+                variant: e.target.value === 'card' ? 'secondary' : 'primary'
+            })}
+            options={[
+              { value: 'button', label: 'Button (Core)' },
+              { value: 'card', label: 'Card (Package)' },
+            ]}
+          />
+
           <Input
             label={isButton ? "Label" : "Title"}
             value={btnProps.label}
             onChange={(e) => onPropChange('label', e.target.value)}
           />
-      </div>
 
-      {isButton && (
-        <div style={{ display: 'flex', gap: theme.spacing['Space.M'], marginTop: theme.spacing['Space.L'] }}>
-          <div style={{ flex: 1 }}>
+          {isButton && (
+            <div style={{ display: 'flex', gap: theme.spacing['Space.M'] }}>
+              <div style={{ flex: 1 }}>
+                <Select
+                  label="Variant"
+                  value={btnProps.variant}
+                  onChange={(e) => onPropChange('variant', e.target.value)}
+                  options={[
+                    { value: 'primary', label: 'Primary' },
+                    { value: 'secondary', label: 'Secondary' },
+                    { value: 'tertiary', label: 'Tertiary' },
+                    { value: 'outline', label: 'Outline' },
+                  ]}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <Select
+                  label="Size"
+                  value={btnProps.size}
+                  onChange={(e) => onPropChange('size', e.target.value)}
+                  options={[
+                    { value: 'S', label: 'Small (S)' },
+                    { value: 'M', label: 'Medium (M)' },
+                    { value: 'L', label: 'Large (L)' },
+                  ]}
+                />
+              </div>
+            </div>
+          )}
+
+          {isButton && (
             <Select
-              label="Variant"
-              value={btnProps.variant}
-              onChange={(e) => onPropChange('variant', e.target.value)}
+              label="Icon (Phosphor)"
+              value={btnProps.icon || ''}
+              onChange={(e) => onPropChange('icon', e.target.value)}
               options={[
-                { value: 'primary', label: 'Primary' },
-                { value: 'secondary', label: 'Secondary' },
-                { value: 'tertiary', label: 'Tertiary' },
-                { value: 'outline', label: 'Outline' },
+                  { value: '', label: 'None' },
+                  { value: 'ph-sparkle', label: 'Sparkle' },
+                  { value: 'ph-heart', label: 'Heart' },
+                  { value: 'ph-bell', label: 'Bell' },
+                  { value: 'ph-rocket', label: 'Rocket' },
+                  { value: 'ph-gear', label: 'Gear' },
               ]}
             />
-          </div>
-          <div style={{ flex: 1 }}>
-            <Select
-              label="Size"
-              value={btnProps.size}
-              onChange={(e) => onPropChange('size', e.target.value)}
-              options={[
-                { value: 'S', label: 'Small (S)' },
-                { value: 'M', label: 'Medium (M)' },
-                { value: 'L', label: 'Large (L)' },
-              ]}
-            />
-          </div>
+          )}
         </div>
-      )}
+      </Accordion>
 
-      {isButton && (
-          <div style={{ marginTop: theme.spacing['Space.L'] }}>
-              <Select
-                label="Icon (Phosphor)"
-                value={btnProps.icon || ''}
-                onChange={(e) => onPropChange('icon', e.target.value)}
-                options={[
-                    { value: '', label: 'None' },
-                    { value: 'ph-sparkle', label: 'Sparkle' },
-                    { value: 'ph-heart', label: 'Heart' },
-                    { value: 'ph-bell', label: 'Bell' },
-                    { value: 'ph-rocket', label: 'Rocket' },
-                    { value: 'ph-gear', label: 'Gear' },
-                ]}
-              />
-          </div>
-      )}
-
-      <div style={{ marginTop: theme.spacing['Space.L'] }}>
+      <Accordion title="Appearance">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing['Space.L'] }}>
           <RangeSlider
             label="Corner Radius"
             motionValue={radiusMotionValue}
@@ -153,101 +183,95 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             min={0}
             max={56}
           />
-      </div>
-      
-      <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing['Space.M'], marginTop: theme.spacing['Space.L'], width: '100%' }}>
-        {/* Fill Color Picker is hidden for Ghost variant as it's defined as having no fill color */}
-        {!isTertiary && (
-          <ColorPicker
-            label="Fill Color"
-            value={btnProps.customFill || (btnProps.variant === 'primary' ? (themeName === 'dark' ? '#ffffff' : '#111111') : (btnProps.componentType === 'card' ? theme.Color.Base.Surface[1] : 'transparent'))}
-            onChange={(e) => onPropChange('customFill', e.target.value)}
-          />
-        )}
-        <ColorPicker
-          label="Text Color"
-          value={btnProps.customColor || (btnProps.variant === 'primary' ? (themeName === 'dark' ? '#000000' : '#ffffff') : (themeName === 'dark' ? '#ffffff' : '#111111'))}
-          onChange={(e) => onPropChange('customColor', e.target.value)}
-        />
-      </div>
-
-      <div style={{ borderTop: `1px solid ${theme.Color.Base.Surface[3]}`, margin: `${theme.spacing['Space.L']} 0` }} />
-      
-      {/* --- FORCED STATES --- */}
-      <div style={{ width: '100%' }}>
-            <Select 
-                label="Interaction State"
-                value={currentInteraction}
-                onChange={handleInteractionChange}
-                options={[
-                    { value: 'default', label: 'Default' },
-                    { value: 'hover', label: 'Hover' },
-                    { value: 'focus', label: 'Focus' },
-                    { value: 'active', label: 'Click' },
-                    { value: 'disabled', label: 'Disabled' },
-                ]}
-            />
-      </div>
-
-      <div style={{ borderTop: `1px solid ${theme.Color.Base.Surface[3]}`, margin: `${theme.spacing['Space.L']} 0` }} />
-      
-      {/* --- INSPECTION TOOLS --- */}
-      <label style={{ ...theme.Type.Readable.Label.S, display: 'block', marginBottom: theme.spacing['Space.M'], color: theme.Color.Base.Content[2], textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-        Inspector
-      </label>
-      
-      <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing['Space.M'] }}>
-        <Toggle
-          label="Show Measurements"
-          isOn={showMeasurements}
-          onToggle={onToggleMeasurements}
-        />
-        <Toggle
-          label="Show Tokens"
-          isOn={showTokens}
-          onToggle={onToggleTokens}
-        />
-        <Toggle
-          label="3D Layer View"
-          isOn={view3D}
-          onToggle={onToggleView3D}
-        />
-        
-        {view3D && (
-          <div style={{ 
-            marginTop: theme.spacing['Space.S'], 
-            padding: theme.spacing['Space.M'], 
-            backgroundColor: theme.Color.Base.Surface[2], 
-            borderRadius: theme.radius['Radius.M'],
-            border: `1px solid ${theme.Color.Base.Surface[3]}`,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: theme.spacing['Space.M']
-          }}>
-             <RangeSlider
-              label="Layer Spacing"
-              motionValue={layerSpacing}
-              onCommit={() => {}}
-              min={0}
-              max={150}
-            />
-            <RangeSlider
-              label="Rotate X"
-              motionValue={viewRotateX}
-              onCommit={() => {}}
-              min={0}
-              max={90}
-            />
-            <RangeSlider
-              label="Rotate Z"
-              motionValue={viewRotateZ}
-              onCommit={() => {}}
-              min={0}
-              max={360}
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing['Space.M'], width: '100%' }}>
+            {!isTertiary && (
+              <ColorPicker
+                label="Fill Color"
+                value={btnProps.customFill || (btnProps.variant === 'primary' ? (themeName === 'dark' ? '#ffffff' : '#111111') : (btnProps.componentType === 'card' ? theme.Color.Base.Surface[1] : 'transparent'))}
+                onChange={(e) => onPropChange('customFill', e.target.value)}
+              />
+            )}
+            <ColorPicker
+              label="Text Color"
+              value={btnProps.customColor || (btnProps.variant === 'primary' ? (themeName === 'dark' ? '#000000' : '#ffffff') : (themeName === 'dark' ? '#ffffff' : '#111111'))}
+              onChange={(e) => onPropChange('customColor', e.target.value)}
             />
           </div>
-        )}
-      </div>
+        </div>
+      </Accordion>
+
+      <Accordion title="State">
+        <div style={{ width: '100%' }}>
+          <Select 
+              label="Interaction State"
+              value={currentInteraction}
+              onChange={handleInteractionChange}
+              options={[
+                  { value: 'default', label: 'Default' },
+                  { value: 'hover', label: 'Hover' },
+                  { value: 'focus', label: 'Focus' },
+                  { value: 'active', label: 'Click' },
+                  { value: 'disabled', label: 'Disabled' },
+              ]}
+          />
+        </div>
+      </Accordion>
+
+      <Accordion title="Inspector">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing['Space.M'] }}>
+          <Toggle
+            label="Show Measurements"
+            isOn={showMeasurements}
+            onToggle={onToggleMeasurements}
+          />
+          <Toggle
+            label="Show Tokens"
+            isOn={showTokens}
+            onToggle={onToggleTokens}
+          />
+          <Toggle
+            label="3D Layer View"
+            isOn={view3D}
+            onToggle={onToggleView3D}
+          />
+          
+          {view3D && (
+            <div style={{ 
+              marginTop: theme.spacing['Space.S'], 
+              padding: theme.spacing['Space.M'], 
+              backgroundColor: theme.Color.Base.Surface[2], 
+              borderRadius: theme.radius['Radius.M'],
+              border: `1px solid ${theme.Color.Base.Surface[3]}`,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing['Space.M']
+            }}>
+               <RangeSlider
+                label="Layer Spacing"
+                motionValue={layerSpacing}
+                onCommit={() => {}}
+                min={0}
+                max={150}
+              />
+              <RangeSlider
+                label="Rotate X"
+                motionValue={viewRotateX}
+                onCommit={() => {}}
+                min={0}
+                max={90}
+              />
+              <RangeSlider
+                label="Rotate Z"
+                motionValue={viewRotateZ}
+                onCommit={() => {}}
+                min={0}
+                max={360}
+              />
+            </div>
+          )}
+        </div>
+      </Accordion>
     </>
   );
 };

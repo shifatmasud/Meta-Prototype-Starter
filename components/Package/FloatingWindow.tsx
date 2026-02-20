@@ -144,14 +144,25 @@ const FloatingWindow: React.FC<FloatingWindowProps> = ({
         {children}
       </div>
 
-      <div
-        style={footerStyle}
-        onPointerDown={(e) => {
-          e.preventDefault();
-          dragControls.start(e);
-        }}
-      >
-        {footer || <div style={{ width: '100%', height: '4px', borderRadius: '2px', backgroundColor: theme.Color.Base.Surface[3] }} />}
+      <div style={{...footerStyle, justifyContent: 'space-between'}}>
+        {footer}
+        <div 
+          style={{ 
+            width: '100%', 
+            height: '100%', 
+            cursor: 'grab',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            touchAction: 'none',
+          }}
+          onPointerDown={(e) => {
+            e.preventDefault();
+            dragControls.start(e);
+          }}
+        >
+          <div style={{ width: '40px', height: '4px', borderRadius: '2px', backgroundColor: theme.Color.Base.Surface[3] }} />
+        </div>
       </div>
     </motion.div>
   );

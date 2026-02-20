@@ -59,9 +59,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
   const defaultLayerSpacing = useMotionValue(0);
   const effectiveLayerSpacing = layerSpacing || defaultLayerSpacing;
 
-  const zStateLayer = useTransform(effectiveLayerSpacing, v => `translateZ(${v}px)`);
-  const zRippleLayer = useTransform(effectiveLayerSpacing, v => `translateZ(${v * 2}px)`);
-  const zContent = useTransform(effectiveLayerSpacing, v => `translateZ(${v * 3}px)`);
+  const zStateLayer = useTransform(effectiveLayerSpacing, (v: any) => `translateZ(${v}px)`);
+  const zRippleLayer = useTransform(effectiveLayerSpacing, (v: any) => `translateZ(${v * 2}px)`);
+  const zContent = useTransform(effectiveLayerSpacing, (v: any) => `translateZ(${v * 3}px)`);
   
   // Helper to calculate relative coordinates
   const getCoords = (e: React.PointerEvent | React.MouseEvent) => {

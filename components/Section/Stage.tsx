@@ -257,7 +257,7 @@ const TokenOverlay: React.FC<{ anatomy: ElementAnatomy; btnProps: StageComponent
   );
 };
 
-const HUDItem = ({ layer, gap, isLast }: { layer: any, gap: MotionValue<number>, isLast: boolean }) => {
+const HUDItem: React.FC<{ layer: any, gap: MotionValue<number>, isLast: boolean }> = ({ layer, gap, isLast }) => {
     const { theme } = useTheme();
     return (
         <motion.div style={{

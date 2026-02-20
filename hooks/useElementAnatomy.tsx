@@ -154,7 +154,7 @@ export const useElementAnatomy = (
       mutationObserver.disconnect();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ref, ...Object.values(selectors), ...deps]);
+  }, [ref, JSON.stringify(selectors), ...deps]);
 
   return anatomy;
 };

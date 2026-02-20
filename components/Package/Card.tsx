@@ -49,10 +49,10 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(({
   const effectiveLayerSpacing = layerSpacing || defaultLayerSpacing;
 
   // 3D Layer Transforms
-  const zStateLayer = useTransform(effectiveLayerSpacing, v => `translateZ(${v}px)`);
-  const zRippleLayer = useTransform(effectiveLayerSpacing, v => `translateZ(${v * 1.5}px)`);
-  const zContent = useTransform(effectiveLayerSpacing, v => `translateZ(${v * 2}px)`);
-  const zMedia = useTransform(effectiveLayerSpacing, v => `translateZ(${v * 3}px)`);
+  const zStateLayer = useTransform(effectiveLayerSpacing, (v: any) => `translateZ(${v}px)`);
+  const zRippleLayer = useTransform(effectiveLayerSpacing, (v: any) => `translateZ(${v * 1.5}px)`);
+  const zContent = useTransform(effectiveLayerSpacing, (v: any) => `translateZ(${v * 2}px)`);
+  const zMedia = useTransform(effectiveLayerSpacing, (v: any) => `translateZ(${v * 3}px)`);
 
   // --- Dynamic Inner Radius Logic ---
   const paddingValue = parseInt(theme.spacing['Space.XL']) || 24;

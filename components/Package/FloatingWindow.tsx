@@ -161,7 +161,7 @@ const FloatingWindow: React.FC<FloatingWindowProps> = ({
             dragControls.start(e);
           }}
         >
-          <div style={{ width: '40px', height: '4px', borderRadius: '2px', backgroundColor: theme.Color.Base.Surface[3] }} />
+          <div style={{ width: '40px', height: '4px', borderRadius: '2px', backgroundColor: theme.Color.Base.Surface[3], opacity: 0 }} />
         </div>
       </div>
     </motion.div>

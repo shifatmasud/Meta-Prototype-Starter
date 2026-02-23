@@ -12,6 +12,7 @@ import RangeSlider from '../Core/RangeSlider.tsx';
 import ColorPicker from '../Core/ColorPicker.tsx';
 import Toggle from '../Core/Toggle.tsx';
 import Accordion from '../Core/Accordion.tsx';
+import ApiInput from '../Core/ApiInput.tsx';
 
 interface ControlPanelProps {
   btnProps: MetaButtonProps;
@@ -36,6 +37,10 @@ interface ControlPanelProps {
     onToggleUIMode: () => void;
   showThemeToggle: boolean;
   onToggleThemeButton: () => void;
+  isAIControlEnabled: boolean;
+  onToggleAIControl: () => void;
+  geminiApiKey: string;
+  onGeminiApiKeyChange: (key: string) => void;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({ 
@@ -59,7 +64,11 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   uiMode,
     onToggleUIMode,
   showThemeToggle,
-  onToggleThemeButton
+  onToggleThemeButton,
+  isAIControlEnabled,
+  onToggleAIControl,
+  geminiApiKey,
+  onGeminiApiKeyChange
 }) => {
   const { theme, themeName, setThemeName } = useTheme();
 
@@ -222,6 +231,23 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                   { value: 'active', label: 'Click' },
                   { value: 'disabled', label: 'Disabled' },
               ]}
+          />
+        </div>
+      </Accordion>
+
+      <Accordion title="Agent">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing['Space.M'] }}>
+          <Toggle
+            label="AI Control"
+            isOn={isAIControlEnabled}
+            onToggle={onToggleAIControl}
+          />
+          <ApiInput
+            label="Gemini API Key"
+            value={geminiApiKey}
+            onChange={onGeminiApiKeyChange}
+            onSave={onGeminiApiKeyChange}
+            placeholder="Enter your API key"
           />
         </div>
       </Accordion>

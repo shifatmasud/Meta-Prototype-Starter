@@ -169,7 +169,7 @@ const SystemSpecWindow = () => {
         zIndex: 10,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing['Space.S'] }}>
-          <Shield size={20} weight="fill" color={theme.Color.Brand.Primary[1]} />
+          <Shield size={20} weight="fill" color={theme.Color.Focus.Content[1]} />
           <span style={{ fontFamily: 'Bebas Neue', fontSize: '18px' }}>System Protocol v1.0</span>
         </div>
         <button 
@@ -212,7 +212,7 @@ const SystemSpecWindow = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.1 }}
             >
-              <span style={{ color: theme.Color.Brand.Primary[1], fontWeight: 'bold' }}>0{i+1}</span>
+              <span style={{ color: theme.Color.Focus.Content[1], fontWeight: 'bold' }}>0{i+1}</span>
               {rule}
             </motion.li>
           ))}
@@ -235,7 +235,7 @@ const SystemSpecWindow = () => {
               width: '40px', 
               height: '40px', 
               borderRadius: '50%', 
-              border: `2px solid ${theme.Color.Brand.Primary[1]}`,
+              border: `2px solid ${theme.Color.Focus.Content[1]}`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
@@ -246,7 +246,7 @@ const SystemSpecWindow = () => {
             }}
             transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
           >
-            <div style={{ width: '4px', height: '4px', backgroundColor: theme.Color.Brand.Primary[1], borderRadius: '50%' }} />
+            <div style={{ width: '4px', height: '4px', backgroundColor: theme.Color.Focus.Content[1], borderRadius: '50%' }} />
           </motion.div>
           <div style={{ position: 'absolute', bottom: 4, fontSize: '8px', fontFamily: 'Victor Mono', opacity: 0.5 }}>
             AUTO_ABSTRACTION_ACTIVE
@@ -288,7 +288,7 @@ const SystemSpecWindow = () => {
             "Reactive Architecture (FSM/Event Bus)."
           ].map((rule, i) => (
             <li key={i} style={itemStyle}>
-              <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: theme.Color.Brand.Primary[1], marginTop: '6px' }} />
+              <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: theme.Color.Focus.Content[1], marginTop: '6px' }} />
               {rule}
             </li>
           ))}
@@ -306,7 +306,7 @@ const SystemSpecWindow = () => {
           {[1, 2, 3, 4].map((node) => (
             <React.Fragment key={node}>
               <motion.div 
-                style={{ width: '12px', height: '12px', backgroundColor: theme.Color.Brand.Primary[1], borderRadius: '2px' }}
+                style={{ width: '12px', height: '12px', backgroundColor: theme.Color.Focus.Content[1], borderRadius: '2px' }}
                 animate={{ scale: [1, 1.5, 1] }}
                 transition={{ duration: 1, repeat: Infinity, delay: node * 0.2 }}
               />

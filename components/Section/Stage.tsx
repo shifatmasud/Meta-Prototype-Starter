@@ -310,6 +310,7 @@ const Stage: React.FC<StageProps> = ({
     viewRotateZ,
     layerSpacing 
 }) => {
+  const { theme } = useTheme();
   const componentRef = useRef<any>(null);
   const containerRotateZ = useTransform(viewRotateZ, v => -v);
 
@@ -349,13 +350,31 @@ const Stage: React.FC<StageProps> = ({
                     layerSpacing={layerSpacing}
                     view3D={view3D}
                 />
-            ) : (
+            ) : btnProps.componentType === 'card' ? (
                 <Card 
                     ref={componentRef}
                     {...btnProps}
                     onClick={onButtonClick}
                     layerSpacing={layerSpacing}
                     view3D={view3D}
+                />
+            ) : (
+                <div 
+                    ref={componentRef}
+                    style={{
+                        padding: '24px',
+                        backgroundColor: btnProps.customFill || theme.Color.Base.Surface[2],
+                        borderRadius: btnProps.customRadius || '12px',
+                        color: btnProps.customColor || theme.Color.Base.Content[1],
+                        border: `1px solid ${theme.Color.Base.Surface[3]}`,
+                        boxShadow: theme.effects['Effect.Shadow.Drop.2'],
+                        minWidth: '200px',
+                        minHeight: '100px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '12px',
+                    }}
+                    dangerouslySetInnerHTML={{ __html: btnProps.customCode || '<div>Custom Component</div>' }}
                 />
             )}
             {showMeasurements && anatomy && <BlueprintOverlay anatomy={anatomy} />}

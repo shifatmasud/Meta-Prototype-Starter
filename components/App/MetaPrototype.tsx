@@ -15,6 +15,7 @@ import ConsolePanel from '../Package/ConsolePanel.tsx';
 import StyleGuidePanel from '../Package/StyleGuidePanel.tsx';
 import TabbedPanel from '../Package/TabbedPanel.tsx';
 import SystemSpec from '../Package/SystemSpec.tsx';
+import AIPanel from '../Package/AIPanel.tsx';
 import UndoRedo from '../Package/UndoRedo.tsx';
 import Confetti from '../Core/Confetti.tsx';
 import { Sliders, Code, Terminal } from 'phosphor-react';
@@ -48,6 +49,16 @@ const MetaPrototype = () => {
   // -- View / Inspection State --
   const [showMeasurements, setShowMeasurements] = useState(false);
   const [showTokens, setShowTokens] = useState(false);
+  const [isAIControlEnabled, setIsAIControlEnabled] = useState(false);
+  const [isAIPanelOpen, setIsAIPanelOpen] = useState(false);
+  const [geminiApiKey, setGeminiApiKey] = useState('');
+
+  useEffect(() => {
+    const savedKey = localStorage.getItem('geminiApiKey');
+    if (savedKey) {
+      setGeminiApiKey(savedKey);
+    }
+  }, []);
   
   // 3D Layer View State
   const [view3D, setView3D] = useState(false);
@@ -102,6 +113,7 @@ const MetaPrototype = () => {
     console: { id: 'console', title: 'Console', isOpen: false, zIndex: 3, x: -WINDOW_WIDTH / 2, y: -CONSOLE_PANEL_HEIGHT / 2, height: CONSOLE_PANEL_HEIGHT },
     styles: { id: 'styles', title: 'Style Guide', isOpen: false, zIndex: 4, x: -WINDOW_WIDTH / 2, y: -CONTROL_PANEL_HEIGHT / 2, height: CONTROL_PANEL_HEIGHT },
     systemSpec: { id: 'systemSpec', title: 'System Spec', isOpen: false, zIndex: 5, x: -WINDOW_WIDTH / 2, y: -CONTROL_PANEL_HEIGHT / 2, height: CONTROL_PANEL_HEIGHT },
+    ai: { id: 'ai', title: 'AI Agent', isOpen: false, zIndex: 6, x: -WINDOW_WIDTH / 2, y: -240, height: 480 },
   });
 
   // -- Code Editor State --
@@ -217,6 +229,25 @@ const MetaPrototype = () => {
     setShowTokens(prev => !prev);
     logEvent(`Tokens toggled: ${!showTokens ? 'On' : 'Off'}`);
   };
+
+  const handleToggleAIControl = () => {
+    const newState = !isAIControlEnabled;
+    setIsAIControlEnabled(newState);
+    setWindows(prev => {
+      const maxZ = Math.max(...Object.values(prev).map((w: WindowState) => w.zIndex));
+      return {
+        ...prev,
+        ai: { ...prev.ai, isOpen: newState, zIndex: newState ? maxZ + 1 : prev.ai.zIndex }
+      };
+    });
+    logEvent(`AI Agent toggled: ${newState ? 'On' : 'Off'}`);
+  };
+
+  const handleGeminiApiKeyChange = (key: string) => {
+    setGeminiApiKey(key);
+    localStorage.setItem('geminiApiKey', key);
+    logEvent('Gemini API Key saved.');
+  };
   
   const handleStageButtonClick = () => {
     logEvent('Component Interacted! (Triggered Action)');
@@ -259,7 +290,6 @@ const MetaPrototype = () => {
             onClose={() => toggleWindow('control')}
             onResize={(newHeight) => handleResize('control', newHeight)}
             onFocus={() => bringToFront('control')}
-            footer={<UndoRedo onUndo={handleUndo} onRedo={handleRedo} canUndo={history.length > 0} canRedo={future.length > 0} />}
           >
             <ControlPanel
                 btnProps={btnProps}
@@ -284,6 +314,10 @@ const MetaPrototype = () => {
                 onToggleUIMode={() => setUiMode(uiMode === 'default' ? 'lean' : 'default')}
                 showThemeToggle={showThemeToggle}
                 onToggleThemeButton={() => setShowThemeToggle(!showThemeToggle)}
+                isAIControlEnabled={isAIControlEnabled}
+                onToggleAIControl={handleToggleAIControl}
+                geminiApiKey={geminiApiKey}
+                onGeminiApiKeyChange={handleGeminiApiKeyChange}
             />
           </FloatingWindow>
         )}
@@ -342,9 +376,28 @@ const MetaPrototype = () => {
             <SystemSpec />
           </FloatingWindow>
         )}
+
+        {windows.ai.isOpen && (
+          <FloatingWindow
+            key="ai"
+            {...windows.ai}
+            onClose={() => {
+              toggleWindow('ai');
+              setIsAIControlEnabled(false);
+            }}
+            onResize={(newHeight) => handleResize('ai', newHeight)}
+            onFocus={() => bringToFront('ai')}
+          >
+            <AIPanel 
+              appState={btnProps} 
+              onUpdateState={(updates) => handlePropChange(updates)}
+              apiKey={geminiApiKey}
+            />
+          </FloatingWindow>
+        )}
       </AnimatePresence>
 
-            {uiMode === 'default' ? (
+      {uiMode === 'default' ? (
         <Dock windows={windows} toggleWindow={toggleWindow} />
       ) : (
         <Dock windows={{ settings: { id: 'settings', title: 'Settings', isOpen: windows.control.isOpen, zIndex: 1, x: 0, y: 0, height: 600 } }} toggleWindow={() => toggleWindow('control')} />
@@ -358,7 +411,6 @@ const MetaPrototype = () => {
           onClose={() => toggleWindow('control')}
           onFocus={() => bringToFront('control')}
           onResize={(newHeight) => handleResize('control', newHeight)}
-          footer={<UndoRedo onUndo={handleUndo} onRedo={handleRedo} canUndo={history.length > 0} canRedo={future.length > 0} />}
         >
           <TabbedPanel 
             panels={[
@@ -369,14 +421,17 @@ const MetaPrototype = () => {
                 onToggleSystemSpec={() => toggleWindow('systemSpec')}
                 view3D={view3D} onToggleView3D={() => setView3D(!view3D)} layerSpacing={layerSpacing} viewRotateX={viewRotateX} viewRotateZ={viewRotateZ} uiMode={uiMode} onToggleUIMode={() => setUiMode(uiMode === 'default' ? 'lean' : 'default')}
                 showThemeToggle={showThemeToggle}
-                onToggleThemeButton={() => setShowThemeToggle(!showThemeToggle)} /> },
+                onToggleThemeButton={() => setShowThemeToggle(!showThemeToggle)}
+                isAIControlEnabled={isAIControlEnabled}
+                onToggleAIControl={handleToggleAIControl}
+                geminiApiKey={geminiApiKey}
+                onGeminiApiKeyChange={handleGeminiApiKeyChange} /> },
               { id: 'code', title: 'Code I/O', icon: <Code size={16} />, content: <CodePanel codeText={codeText} onCodeChange={handleCodeChange} onCopyCode={handleCopyCode} onFocus={() => setIsCodeFocused(true)} onBlur={() => setIsCodeFocused(false)} btnProps={btnProps} /> },
               { id: 'console', title: 'Console', icon: <Terminal size={16} />, content: <ConsolePanel logs={logs} /> },
             ]}
           />
         </FloatingWindow>
       )}
-
     </div>
   );
 };

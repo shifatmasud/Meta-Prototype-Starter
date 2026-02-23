@@ -16,7 +16,7 @@ interface Message {
 }
 
 interface AIPanelProps {
-  appState: any;
+  appState: MetaButtonProps;
   onUpdateState: (updates: Partial<MetaButtonProps>) => void;
   apiKey: string;
 }

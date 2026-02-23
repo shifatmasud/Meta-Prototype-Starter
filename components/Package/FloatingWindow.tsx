@@ -20,7 +20,6 @@ interface FloatingWindowProps {
   onClose: () => void;
   onFocus: () => void;
   children: React.ReactNode;
-  footer?: React.ReactNode;
 }
 
 const FloatingWindow: React.FC<FloatingWindowProps> = ({
@@ -31,7 +30,6 @@ const FloatingWindow: React.FC<FloatingWindowProps> = ({
   onClose,
   onFocus,
   children,
-  footer,
 }) => {
   const { theme } = useTheme();
   const dragControls = useDragControls();
@@ -89,7 +87,7 @@ const FloatingWindow: React.FC<FloatingWindowProps> = ({
     borderTop: `1px solid ${theme.Color.Base.Surface[2]}`,
     cursor: 'grab',
     userSelect: 'none',
-
+    backgroundColor: theme.Color.Base.Surface[2],
     flexShrink: 0,
     touchAction: 'none',
   };
@@ -143,18 +141,6 @@ const FloatingWindow: React.FC<FloatingWindowProps> = ({
       >
         {children}
       </div>
-
-      {footer && (
-        <div
-          style={footerStyle}
-          onPointerDown={(e) => {
-            e.preventDefault();
-            dragControls.start(e);
-          }}
-        >
-          {footer}
-        </div>
-      )}
     </motion.div>
   );
 };

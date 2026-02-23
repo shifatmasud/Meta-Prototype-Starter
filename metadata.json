@@ -1,5 +1,5 @@
 {
-  "name": "Meta Prototype - AI Co-Creator",
-  "description": "A design engineering prototype where Gemini has full read/write access to the codebase to evolve the UI in real-time.",
+  "name": "Meta Prototype Starter ",
+  "description": "Starter Project File ",
   "requestFramePermissions": []
 }

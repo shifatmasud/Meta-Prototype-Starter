@@ -158,7 +158,13 @@ const FloatingWindow: React.FC<FloatingWindowProps> = ({
         {children}
       </div>
       {showFooter && (
-        <div style={footerStyle} onPointerDown={(e) => e.stopPropagation()}>
+        <div
+          style={footerStyle}
+          onPointerDown={(e) => {
+            e.preventDefault();
+            dragControls.start(e);
+          }}
+        >
           {onUndo && onRedo && <UndoRedo onUndo={onUndo} onRedo={onRedo} canUndo={canUndo} canRedo={canRedo} />}
         </div>
       )}

@@ -6,7 +6,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ThemeProvider, useTheme } from './Theme.tsx';
 import { BreakpointProvider } from './hooks/useBreakpoint.tsx';
-import Welcome from './components/Page/Welcome.tsx';
+import Stage from './src/components/Stage/index.tsx';
 import './styles.css';
 
 function App() {
@@ -17,7 +17,7 @@ function App() {
   }, [theme]);
 
   return (
-      <Welcome />
+      <Stage />
   );
 }
 

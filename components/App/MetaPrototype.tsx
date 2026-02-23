@@ -290,6 +290,7 @@ const MetaPrototype = () => {
             onClose={() => toggleWindow('control')}
             onResize={(newHeight) => handleResize('control', newHeight)}
             onFocus={() => bringToFront('control')}
+            showFooter={true}
           >
             <ControlPanel
                 btnProps={btnProps}
@@ -329,6 +330,7 @@ const MetaPrototype = () => {
             onClose={() => toggleWindow('code')}
             onResize={(newHeight) => handleResize('code', newHeight)}
             onFocus={() => bringToFront('code')}
+            showFooter={true}
           >
             <CodePanel
               codeText={codeText}
@@ -348,6 +350,7 @@ const MetaPrototype = () => {
             onClose={() => toggleWindow('console')}
             onResize={(newHeight) => handleResize('console', newHeight)}
             onFocus={() => bringToFront('console')}
+            showFooter={true}
           >
             <ConsolePanel logs={logs} />
           </FloatingWindow>
@@ -388,8 +391,15 @@ const MetaPrototype = () => {
             onResize={(newHeight) => handleResize('ai', newHeight)}
             onFocus={() => bringToFront('ai')}
           >
-            <AIPanel 
-              appState={btnProps} 
+            <AIPanel
+              appState={{
+                btnProps,
+                windows,
+                uiMode,
+                view3D,
+                showMeasurements,
+                showTokens,
+              }}
               onUpdateState={(updates) => handlePropChange(updates)}
               apiKey={geminiApiKey}
             />
@@ -411,6 +421,7 @@ const MetaPrototype = () => {
           onClose={() => toggleWindow('control')}
           onFocus={() => bringToFront('control')}
           onResize={(newHeight) => handleResize('control', newHeight)}
+          showFooter={true}
         >
           <TabbedPanel 
             panels={[

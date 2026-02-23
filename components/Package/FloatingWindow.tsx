@@ -17,9 +17,12 @@ interface FloatingWindowProps {
   zIndex: number;
   x: number;
   y: number;
+  height: number;
   onClose: () => void;
   onFocus: () => void;
+  onResize?: (newHeight: number) => void;
   children: React.ReactNode;
+  showFooter?: boolean;
 }
 
 const FloatingWindow: React.FC<FloatingWindowProps> = ({
@@ -27,9 +30,12 @@ const FloatingWindow: React.FC<FloatingWindowProps> = ({
   zIndex,
   x: initialX,
   y: initialY,
+  height,
   onClose,
   onFocus,
+  onResize,
   children,
+  showFooter,
 }) => {
   const { theme } = useTheme();
   const dragControls = useDragControls();
@@ -141,6 +147,7 @@ const FloatingWindow: React.FC<FloatingWindowProps> = ({
       >
         {children}
       </div>
+      {showFooter && <div style={footerStyle} onPointerDown={(e) => e.stopPropagation()} />}
     </motion.div>
   );
 };

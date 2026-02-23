@@ -81,22 +81,23 @@ const AIPanel: React.FC<AIPanelProps> = ({ appState, onUpdateState, apiKey }) =>
             customRadius: { type: Type.STRING, description: "The corner radius (e.g., '20px')." },
             customFill: { type: Type.STRING, description: "The background color hex code." },
             customColor: { type: Type.STRING, description: "The text color hex code." },
-            customCode: { type: Type.STRING, description: "React/JSX code for a custom component, adhering to the project's design system and spec. Only use when componentType is 'custom'." },
+            customCode: { type: Type.STRING, description: "React/JSX code for a custom component. Only use when componentType is 'custom'." },
             disabled: { type: Type.BOOLEAN, description: "Whether the component is disabled." },
           },
         },
       };
 
-      const chat = ai.chats.create({
+      const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
+        contents: [
+          { role: 'user', parts: [{ text: `Current App State (Internal Code): ${JSON.stringify(appState, null, 2)}` }] },
+          { role: 'user', parts: [{ text: userMessage }] }
+        ],
         config: {
-          systemInstruction: "You are a world-class senior design engineer agent. You can read and write the application internal state. Use the updateAppState tool to change component properties or create entirely new components using 'customCode'. When using 'customCode', provide a valid React component body or JSX that adheres to the project's design system and spec. Avoid embedding vanilla HTML, CSS, or JavaScript directly. Be extremely concise and minimalist. Your goal is to make the prototype feel alive and high-fidelity. You are also intent-aware and can engage in chat to understand user needs or provide explanations.",
+          systemInstruction: "You are a world-class senior design engineer agent. You can read and write the application internal state. Use the updateAppState tool to change component properties or create entirely new components using 'customCode'. When using 'customCode', provide a valid React component body or JSX. Be extremely concise and minimalist. Your goal is to make the prototype feel alive and high-fidelity.",
           tools: [{ functionDeclarations: [updateStateFunctionDeclaration] }],
         },
       });
-
-      const chatMessages = messages.map(msg => ({ role: msg.role, parts: [{ text: msg.text }] }));
-      const response = await chat.sendMessage({ message: [...chatMessages, { role: 'user', parts: [{ text: `Current App State (Internal Code): ${JSON.stringify(appState, null, 2)}` }, { text: userMessage }] }] });
 
       const functionCalls = response.functionCalls;
       if (functionCalls) {

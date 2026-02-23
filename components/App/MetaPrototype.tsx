@@ -290,11 +290,7 @@ const MetaPrototype = () => {
             onClose={() => toggleWindow('control')}
             onResize={(newHeight) => handleResize('control', newHeight)}
             onFocus={() => bringToFront('control')}
-            showFooter={true}
-            onUndo={handleUndo}
-            onRedo={handleRedo}
-            canUndo={history.length > 0}
-            canRedo={future.length > 0}
+            footer={<UndoRedo onUndo={handleUndo} onRedo={handleRedo} canUndo={history.length > 0} canRedo={future.length > 0} />}
           >
             <ControlPanel
                 btnProps={btnProps}
@@ -334,11 +330,7 @@ const MetaPrototype = () => {
             onClose={() => toggleWindow('code')}
             onResize={(newHeight) => handleResize('code', newHeight)}
             onFocus={() => bringToFront('code')}
-            showFooter={true}
-            onUndo={handleUndo}
-            onRedo={handleRedo}
-            canUndo={history.length > 0}
-            canRedo={future.length > 0}
+            footer={<UndoRedo onUndo={handleUndo} onRedo={handleRedo} canUndo={history.length > 0} canRedo={future.length > 0} />}
           >
             <CodePanel
               codeText={codeText}
@@ -358,11 +350,7 @@ const MetaPrototype = () => {
             onClose={() => toggleWindow('console')}
             onResize={(newHeight) => handleResize('console', newHeight)}
             onFocus={() => bringToFront('console')}
-            showFooter={true}
-            onUndo={handleUndo}
-            onRedo={handleRedo}
-            canUndo={history.length > 0}
-            canRedo={future.length > 0}
+            footer={<UndoRedo onUndo={handleUndo} onRedo={handleRedo} canUndo={history.length > 0} canRedo={future.length > 0} />}
           >
             <ConsolePanel logs={logs} />
           </FloatingWindow>
@@ -403,15 +391,8 @@ const MetaPrototype = () => {
             onResize={(newHeight) => handleResize('ai', newHeight)}
             onFocus={() => bringToFront('ai')}
           >
-            <AIPanel
-              appState={{
-                btnProps,
-                windows,
-                uiMode,
-                view3D,
-                showMeasurements,
-                showTokens,
-              }}
+            <AIPanel 
+              appState={btnProps} 
               onUpdateState={(updates) => handlePropChange(updates)}
               apiKey={geminiApiKey}
             />
@@ -433,11 +414,7 @@ const MetaPrototype = () => {
           onClose={() => toggleWindow('control')}
           onFocus={() => bringToFront('control')}
           onResize={(newHeight) => handleResize('control', newHeight)}
-          showFooter={true}
-          onUndo={handleUndo}
-          onRedo={handleRedo}
-          canUndo={history.length > 0}
-          canRedo={future.length > 0}
+          footer={<UndoRedo onUndo={handleUndo} onRedo={handleRedo} canUndo={history.length > 0} canRedo={future.length > 0} />}
         >
           <TabbedPanel 
             panels={[

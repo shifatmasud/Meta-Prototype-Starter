@@ -12,23 +12,15 @@ import { useTheme } from '../../Theme.tsx';
  * Its mounting/unmounting (and thus its open/closed state and animations) are
  * controlled by AnimatePresence in its parent component.
  */
-import UndoRedo from './UndoRedo';
-
 interface FloatingWindowProps {
   title: string;
   zIndex: number;
   x: number;
   y: number;
-  height: number;
   onClose: () => void;
   onFocus: () => void;
-  onResize?: (newHeight: number) => void;
   children: React.ReactNode;
-  showFooter?: boolean;
-  onUndo?: () => void;
-  onRedo?: () => void;
-  canUndo?: boolean;
-  canRedo?: boolean;
+  footer?: React.ReactNode;
 }
 
 const FloatingWindow: React.FC<FloatingWindowProps> = ({
@@ -36,16 +28,10 @@ const FloatingWindow: React.FC<FloatingWindowProps> = ({
   zIndex,
   x: initialX,
   y: initialY,
-  height,
   onClose,
   onFocus,
-  onResize,
   children,
-  showFooter,
-  onUndo,
-  onRedo,
-  canUndo,
-  canRedo,
+  footer,
 }) => {
   const { theme } = useTheme();
   const dragControls = useDragControls();
@@ -103,7 +89,7 @@ const FloatingWindow: React.FC<FloatingWindowProps> = ({
     borderTop: `1px solid ${theme.Color.Base.Surface[2]}`,
     cursor: 'grab',
     userSelect: 'none',
-    backgroundColor: theme.Color.Base.Surface[2],
+
     flexShrink: 0,
     touchAction: 'none',
   };
@@ -157,7 +143,8 @@ const FloatingWindow: React.FC<FloatingWindowProps> = ({
       >
         {children}
       </div>
-      {showFooter && (
+
+      {footer && (
         <div
           style={footerStyle}
           onPointerDown={(e) => {
@@ -165,7 +152,7 @@ const FloatingWindow: React.FC<FloatingWindowProps> = ({
             dragControls.start(e);
           }}
         >
-          {onUndo && onRedo && <UndoRedo onUndo={onUndo} onRedo={onRedo} canUndo={canUndo} canRedo={canRedo} />}
+          {footer}
         </div>
       )}
     </motion.div>

@@ -291,6 +291,10 @@ const MetaPrototype = () => {
             onResize={(newHeight) => handleResize('control', newHeight)}
             onFocus={() => bringToFront('control')}
             showFooter={true}
+            onUndo={handleUndo}
+            onRedo={handleRedo}
+            canUndo={history.length > 0}
+            canRedo={future.length > 0}
           >
             <ControlPanel
                 btnProps={btnProps}
@@ -331,6 +335,10 @@ const MetaPrototype = () => {
             onResize={(newHeight) => handleResize('code', newHeight)}
             onFocus={() => bringToFront('code')}
             showFooter={true}
+            onUndo={handleUndo}
+            onRedo={handleRedo}
+            canUndo={history.length > 0}
+            canRedo={future.length > 0}
           >
             <CodePanel
               codeText={codeText}
@@ -351,6 +359,10 @@ const MetaPrototype = () => {
             onResize={(newHeight) => handleResize('console', newHeight)}
             onFocus={() => bringToFront('console')}
             showFooter={true}
+            onUndo={handleUndo}
+            onRedo={handleRedo}
+            canUndo={history.length > 0}
+            canRedo={future.length > 0}
           >
             <ConsolePanel logs={logs} />
           </FloatingWindow>
@@ -422,6 +434,10 @@ const MetaPrototype = () => {
           onFocus={() => bringToFront('control')}
           onResize={(newHeight) => handleResize('control', newHeight)}
           showFooter={true}
+          onUndo={handleUndo}
+          onRedo={handleRedo}
+          canUndo={history.length > 0}
+          canRedo={future.length > 0}
         >
           <TabbedPanel 
             panels={[

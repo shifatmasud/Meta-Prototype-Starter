@@ -12,6 +12,8 @@ import { useTheme } from '../../Theme.tsx';
  * Its mounting/unmounting (and thus its open/closed state and animations) are
  * controlled by AnimatePresence in its parent component.
  */
+import UndoRedo from './UndoRedo';
+
 interface FloatingWindowProps {
   title: string;
   zIndex: number;
@@ -23,6 +25,10 @@ interface FloatingWindowProps {
   onResize?: (newHeight: number) => void;
   children: React.ReactNode;
   showFooter?: boolean;
+  onUndo?: () => void;
+  onRedo?: () => void;
+  canUndo?: boolean;
+  canRedo?: boolean;
 }
 
 const FloatingWindow: React.FC<FloatingWindowProps> = ({
@@ -36,6 +42,10 @@ const FloatingWindow: React.FC<FloatingWindowProps> = ({
   onResize,
   children,
   showFooter,
+  onUndo,
+  onRedo,
+  canUndo,
+  canRedo,
 }) => {
   const { theme } = useTheme();
   const dragControls = useDragControls();
@@ -147,7 +157,17 @@ const FloatingWindow: React.FC<FloatingWindowProps> = ({
       >
         {children}
       </div>
-      {showFooter && <div style={footerStyle} onPointerDown={(e) => e.stopPropagation()} />}
+      {showFooter && (
+        <div
+          style={footerStyle}
+          onPointerDown={(e) => {
+            e.preventDefault();
+            dragControls.start(e);
+          }}
+        >
+          {onUndo && onRedo && <UndoRedo onUndo={onUndo} onRedo={onRedo} canUndo={canUndo} canRedo={canRedo} />}
+        </div>
+      )}
     </motion.div>
   );
 };
